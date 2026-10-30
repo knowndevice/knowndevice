@@ -1,0 +1,46 @@
+Known Device
+Copyright 2026 Known Device contributors
+
+This project is licensed under the Apache License, Version 2.0.
+Third-party software
+
+Known Device uses the following pinned Go modules. Their copyright notices,
+license terms and inherited third-party notices are reproduced without changes
+in third_party/licenses/. The inventory is third_party/licenses/README.md;
+manifest.json records each copied file and its SHA-256 digest.
+
+github.com/eclipse/paho.golang v0.23.0 - EPL-2.0 OR BSD-3-Clause (EDL-1.0)
+github.com/google/jsonschema-go v0.4.3 - MIT
+github.com/spf13/cobra v1.10.2 - Apache-2.0
+github.com/spf13/pflag v1.0.10 - BSD-3-Clause
+go.yaml.in/yaml/v3 v3.0.4 - Apache-2.0 AND MIT
+modernc.org/sqlite v1.60.1 - BSD-3-Clause; SQLite public domain; bundled notices
+github.com/dustin/go-humanize v1.0.1 - MIT
+github.com/google/uuid v1.6.0 - BSD-3-Clause
+github.com/mattn/go-isatty v0.0.24 - MIT
+github.com/ncruces/go-strftime v1.0.0 - MIT
+github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec - BSD-3-Clause
+golang.org/x/sys v0.48.0 - BSD-3-Clause
+modernc.org/libc v1.77.1 - BSD-3-Clause; bundled notices
+modernc.org/mathutil v1.7.1 - BSD-3-Clause
+modernc.org/memory v1.12.1 - BSD-3-Clause; supplementary notices
+Go standard library and runtime go1.27.2 - BSD-3-Clause
+
+Paho supplies the Eclipse Public License 2.0 and Eclipse Distribution License
+1.0 as licensing alternatives. Both upstream texts are included. The YAML
+module applies MIT to its libyaml-derived files and Apache-2.0 to its remaining
+files; its upstream NOTICE follows verbatim.
+
+Copyright 2011-2016 Canonical Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

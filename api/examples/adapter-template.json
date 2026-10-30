@@ -1,0 +1,82 @@
+{
+  "apiVersion": "knowndevice-adapter/v1alpha1",
+  "kind": "template",
+  "name": "sample-adapter",
+  "backend": "profilehttp-reference",
+  "scope": "fixture-reference-composition",
+  "protocolVersion": "knowndevice-process/0.1-alpha.1",
+  "errorVersion": "knowndevice-process-errors/1",
+  "schemas": [
+    {
+      "id": "urn:knowndevice:process:0.1-alpha.1",
+      "version": "1",
+      "sha256": "d66e3128d8294efc93be0b39a1a7b7c2f84b317a7e50008a0f87d8ac136fdaf7"
+    }
+  ],
+  "compositionId": "local-http-process-lab",
+  "compositionVersion": 1,
+  "supportedProfiles": [
+    {
+      "id": "reference-generation-cn",
+      "version": 1,
+      "policyDigest": "f0eb9b354f7a0fe2b075fba5c3481ef613ad49687629f713ea455c770942547f"
+    },
+    {
+      "id": "stable-device-cn",
+      "version": 1,
+      "policyDigest": "c9d1d264e0875a05f02d29557d671ae1d22c68454c84e8bf98c715543f617bcc"
+    }
+  ],
+  "capabilities": [
+    "application.activate",
+    "application.activationStatus",
+    "authority.import",
+    "authority.issue",
+    "authority.lookup",
+    "authority.revocationStatus",
+    "authority.revoke",
+    "bounded-interval",
+    "bounded-unknown-issuance",
+    "clock.assess",
+    "current-entitlement",
+    "durable-activation-and-fresh-observation",
+    "durable-deny-and-session-inventory",
+    "entitlement.authorize",
+    "exact-peer-binding",
+    "explicit-access-observation",
+    "platform.register",
+    "platform.registrationStatus",
+    "transport.probe",
+    "withdrawal.status",
+    "withdrawal.withdraw"
+  ],
+  "permissions": {
+    "networkOriginsFrom": [
+      "application",
+      "control",
+      "issuance",
+      "transport"
+    ],
+    "filesystemRead": [],
+    "filesystemWrite": [],
+    "signerBroker": true
+  },
+  "limits": {
+    "maxLineBytes": 1048576,
+    "maxCSRBytes": 16384,
+    "maxChainBytes": 65536,
+    "maxCertificates": 8,
+    "maxDepth": 32,
+    "maxValues": 10000,
+    "maxObjectFields": 64,
+    "maxArrayItems": 256,
+    "maxStringBytes": 262144,
+    "maxInFlight": 1,
+    "maxRequests": 4096,
+    "maxSignerCalls": 32,
+    "maxSignatureBytes": 512,
+    "maxDigestBytes": 64,
+    "maxStderrBytes": 1048576,
+    "maxTimeoutMillis": 60000
+  }
+}

@@ -1,0 +1,612 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:evidence:v1alpha2",
+  "title": "Known Device internal role evidence",
+  "$ref": "#/$defs/evidence",
+  "$defs": {
+    "plan": {
+      "title": "Known Device profile-bound plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "operationId",
+        "deviceId",
+        "mode",
+        "expectedGeneration",
+        "targetGeneration",
+        "targetSlot",
+        "configDigest",
+        "expiresAt",
+        "digest",
+        "deploymentId",
+        "profileId",
+        "profileVersion",
+        "profileDigest",
+        "compositionDigest",
+        "snapshotDigest",
+        "controlTrustDigest",
+        "applicationTrustDigest",
+        "issuanceTrustDigest",
+        "recoveryTrustDigest",
+        "transportTrustDigest",
+        "digestEncodingVersion"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": "knowndevice/v1alpha2"
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "mode": {
+          "enum": [
+            "enroll",
+            "rotate",
+            "recover"
+          ]
+        },
+        "expectedGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetGeneration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "targetSlot": {
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "configDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "controlTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "applicationTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "issuanceTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "recoveryTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "transportTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "digestEncodingVersion": {
+          "const": 2
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "enroll"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "expectedGeneration": {
+                "const": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "expectedGeneration": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentId",
+        "deviceId",
+        "operationId",
+        "planDigest",
+        "configDigest",
+        "snapshotDigest",
+        "profileId",
+        "profileVersion",
+        "profileDigest",
+        "generation",
+        "publicKeyDigest",
+        "certificateFingerprint",
+        "csrDigest"
+      ],
+      "properties": {
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "publicKeyDigest": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        },
+        "certificateFingerprint": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        },
+        "csrDigest": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "deviceId",
+        "generation",
+        "endpoint",
+        "nonce",
+        "deadline"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "endpoint": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "role",
+        "action",
+        "requestId",
+        "plan",
+        "subject",
+        "revision",
+        "reference",
+        "source",
+        "observedAt",
+        "deadline",
+        "status"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": "knowndevice/v1alpha2"
+        },
+        "role": {
+          "enum": [
+            "entitlement",
+            "authority",
+            "platform",
+            "transport",
+            "application",
+            "clock",
+            "withdrawal"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "subject": {
+          "$ref": "#/$defs/binding"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "completed",
+            "accepted",
+            "denied",
+            "unknown",
+            "not-started"
+          ]
+        },
+        "issuanceEarliest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "issuanceLatest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "phase",
+        "applicationId",
+        "activationRevision",
+        "active",
+        "instanceId",
+        "connectionId",
+        "sessionId",
+        "challenge",
+        "acceptedScope"
+      ],
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "phase": {
+          "enum": [
+            "candidate-verified",
+            "activated"
+          ]
+        },
+        "applicationId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "activationRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "active": {
+          "$ref": "#/$defs/binding"
+        },
+        "instanceId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "sessionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "challenge": {
+          "$ref": "#/$defs/probe"
+        },
+        "acceptedScope": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "const": "fresh-challenge"
+          }
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "kind",
+        "connectionId",
+        "challenge"
+      ],
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "kind": {
+          "enum": [
+            "accepted",
+            "denied",
+            "unknown",
+            "terminated"
+          ]
+        },
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "challenge": {
+          "$ref": "#/$defs/probe"
+        }
+      }
+    },
+    "withdrawal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "previous",
+        "target",
+        "policyRevision",
+        "scope",
+        "sessionsTerminated",
+        "denial",
+        "current"
+      ],
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "previous": {
+          "$ref": "#/$defs/binding"
+        },
+        "target": {
+          "$ref": "#/$defs/binding"
+        },
+        "policyRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "scope": {
+          "const": "whole-service-lab"
+        },
+        "sessionsTerminated": {
+          "type": "boolean"
+        },
+        "denial": {
+          "$ref": "#/$defs/access"
+        },
+        "current": {
+          "$ref": "#/$defs/application"
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectionId",
+        "authenticated"
+      ],
+      "properties": {
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "authenticated": {
+          "type": "boolean"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "certificateFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicKeyDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "authenticated": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "certificateFingerprint",
+              "publicKeyDigest"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "binding"
+                  ]
+                },
+                {
+                  "required": [
+                    "certificateFingerprint"
+                  ]
+                },
+                {
+                  "required": [
+                    "publicKeyDigest"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sessionInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "scope",
+        "complete",
+        "connections"
+      ],
+      "properties": {
+        "evidence": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "properties": {
+                "role": {
+                  "const": "transport"
+                },
+                "action": {
+                  "const": "session-inventory"
+                },
+                "status": {
+                  "const": "ok"
+                }
+              }
+            }
+          ]
+        },
+        "scope": {
+          "const": "whole-service-lab"
+        },
+        "complete": {
+          "const": true
+        },
+        "connections": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/connection"
+          }
+        }
+      }
+    }
+  }
+}

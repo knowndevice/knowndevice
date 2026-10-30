@@ -1,0 +1,13 @@
+{
+  "apiVersion": "knowndevice/v1alpha2",
+  "scope": "profile-device-path",
+  "deploymentId": "new-example-deployment",
+  "deviceId": "new-example-device",
+  "profileId": "stable-device-cn",
+  "profileVersion": 1,
+  "profileDigest": "c9d1d264e0875a05f02d29557d671ae1d22c68454c84e8bf98c715543f617bcc",
+  "outcome": "idle",
+  "health": "unknown",
+  "activeGeneration": 0,
+  "previousRetired": false
+}

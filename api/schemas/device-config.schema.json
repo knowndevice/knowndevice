@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:device-config:v1alpha1",
+  "title": "Known Device reference lab configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "deviceId", "stateDir", "controlURL", "applicationURL", "applicationId", "mqttEndpoint", "rootCertificate", "clockTrust", "requestTimeoutSeconds", "planTTLSeconds"],
+  "properties": {
+    "apiVersion": {"const": "knowndevice/v1alpha1"},
+    "deviceId": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,47}$"},
+    "stateDir": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "controlURL": {"type": "string", "pattern": "^https://", "maxLength": 2048},
+    "applicationURL": {"type": "string", "pattern": "^https://", "maxLength": 2048},
+    "applicationId": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,47}$"},
+    "mqttEndpoint": {"type": "string", "pattern": "^tls://", "maxLength": 2048},
+    "rootCertificate": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "recoveryCertificate": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "recoveryKey": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "clockTrust": {"enum": ["trusted-system-clock", "untrusted"]},
+    "requestTimeoutSeconds": {"type": "integer", "minimum": 1, "maximum": 30},
+    "planTTLSeconds": {"type": "integer", "minimum": 1, "maximum": 600}
+  },
+  "dependentRequired": {"recoveryCertificate": ["recoveryKey"], "recoveryKey": ["recoveryCertificate"]}
+}

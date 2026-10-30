@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: Apache-2.0
+
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+	"syscall"
+
+	"knowndevice.local/knowndevice/adapters/process"
+	"knowndevice.local/knowndevice/sdk/adaptergen"
+	"knowndevice.local/knowndevice/sdk/device"
+)
+
+func run(args []string, output io.Writer) error {
+	flags := flag.NewFlagSet("manifest", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	snapshotPath := flags.String("snapshot", "", "Canonical public process snapshot")
+	executable := flags.String("adapter", "", "Absolute pinned adapter executable")
+	if flags.Parse(args) != nil || flags.NArg() != 0 || *snapshotPath == "" || *executable == "" {
+		return fmt.Errorf("select --snapshot and --adapter")
+	}
+	file, err := os.OpenFile(*snapshotPath, os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	if err != nil {
+		return fmt.Errorf("public snapshot read refused")
+	}
+	info, statErr := file.Stat()
+	if statErr != nil || !info.Mode().IsRegular() || info.Size() <= 0 || info.Size() > process.MaxSnapshotBytes {
+		file.Close()
+		return fmt.Errorf("public snapshot read refused")
+	}
+	data, readErr := io.ReadAll(io.LimitReader(file, process.MaxSnapshotBytes+1))
+	closeErr := file.Close()
+	if readErr != nil || closeErr != nil || len(data) > process.MaxSnapshotBytes {
+		return fmt.Errorf("public snapshot read refused")
+	}
+	snapshot, err := device.DecodeSnapshot(data)
+	if err != nil {
+		return fmt.Errorf("public snapshot refused")
+	}
+	digest, err := process.ExecutableDigest(*executable)
+	if err != nil {
+		return fmt.Errorf("adapter executable identity refused")
+	}
+	manifest, err := adaptergen.Bind({{quote .Name}}, snapshot, digest)
+	if err != nil {
+		return err
+	}
+	if json.NewEncoder(output).Encode(manifest) != nil {
+		return fmt.Errorf("adapter manifest write failed")
+	}
+	return nil
+}
+
+func main() {
+	if err := run(os.Args[1:], os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+}

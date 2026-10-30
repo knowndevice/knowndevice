@@ -1,0 +1,88 @@
+# {{.Name}}
+
+This standalone Go module composes the existing public `profilehttp` reference
+backend and `SystemClock` behind `knowndevice-process/0.1-alpha.1`. It uses only
+public imports. It is a working fixture/reference wrapper, with no independent
+CA, transport, application or hardware integration claim.
+
+The explicit local `replace` in `go.mod` selects the local alpha SDK. The
+`v0.0.0` requirement is a local placeholder; the SDK has not been published and
+no canonical repository has been selected. The generated name identifies this
+wrapper and does not create another role ID or a new trust policy.
+
+## Build and run the public suite
+
+Use Go 1.27.2 and an available local SDK dependency cache, or normal access to
+the pinned modules in `go.mod`/`go.sum`.
+
+```sh
+./scripts/ci.sh
+```
+
+The executable CI example verifies dependencies, builds the process adapter,
+runs tests, and runs the public conformance suite for built-in and process
+composition. Each case has fresh generated identities, keys and local TLS
+fixture listeners. `fixtures/expectations.json` is read by the test and checked
+against the public suite's case list and observed reports. These fixture checks
+are `in-memory-model` evidence; they are separate from actual service effects,
+controller transition labs, independent adapter authors and hardware validation.
+
+For an existing freshly seeded process lab, select this built executable's
+digest when constructing its immutable snapshot. Never replace a binary behind
+an active bind mount or change an existing lab's artifact selection.
+
+## Manifest and permissions
+
+`adapter-template.json` declares the implemented contracts and the rule for
+deriving exact network origins from the selected public snapshot. It is an
+unbound template: it contains no invented origins, executable pin, or profile
+selection. The bundled strict `adapter.schema.json` validates both the template
+and concrete manifest. To emit a concrete manifest, select the canonical public
+snapshot and the exact already-built adapter pinned by that snapshot:
+
+```sh
+go run ./cmd/manifest --snapshot /absolute/fresh/public-snapshot.json --adapter /absolute/pinned/adapter
+```
+
+This command verifies the executable bytes and process-composition pin, then
+prints the exact snapshot/profile/composition/schema digests, sorted
+capabilities, normalized HTTPS origins, empty filesystem lists, signer brokerage
+and fixed protocol limits. It does not contact a service. Initialization
+independently negotiates those same contracts before a domain call.
+
+Filesystem lists are empty because initialize supplies public snapshot bytes.
+Network origins come only from the selected application, control, issuance and
+transport roles. Private keys remain behind temporary signer references; no key
+bytes cross stdio. These declarations and the subprocess do not restrict direct
+system calls or establish operating-system isolation.
+
+## Retry, status and unknown results
+
+The wrapper performs no automatic mutation retry. A lost or late response,
+timeout, cancellation after dispatch, process crash, or invalid response leaves
+attempted effects `unknown`. Cancellation cannot undo remote work or remove
+durable controller intent. A fresh session must use the original plan,
+reservation, CSR, SPKI and scope for the role's actual authenticated status.
+Unknown issuance never permits another `/sign`.
+
+The selected reference control service supplies bounded lookup/import and
+status. Raw step-ca operation lookup or idempotency is not invented by this
+wrapper. An unavailable capability or incomplete proof returns explicit
+unsupported, denial or unknown; it cannot establish absence.
+
+Candidate verification cannot grant activation CAS. Activation requires durable
+authenticated Application status, its activation revision, and a fresh
+independent observation after switching. Effective retirement requires durable
+deny, session evidence, authenticated old access denial and a fresh target
+observation. CA revoke, local expiry, a TLS alert, or socket closure alone is
+insufficient. The shared SDK still checks complete validity/deadline intervals,
+exact authenticated peer leaf/SPKI, generation fencing and strict profiles.
+
+## Generation safety
+
+The generator accepts a new single directory name under an existing absolute
+symlink-free root. It refuses traversal, invalid names/modules, symlink
+components, existing directories and collisions. File writes use rooted
+exclusive creation and never overwrite existing files. Content and modes are
+deterministic for identical options. An interrupted or failed generation leaves
+its partial directory for inspection; select a new directory to retry.

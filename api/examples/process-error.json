@@ -1,0 +1,28 @@
+{
+  "jsonrpc": "2.0",
+  "id": "h-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "error": {
+    "code": -32013,
+    "message": "Remote outcome unknown; reconciliation required",
+    "data": {
+      "version": "knowndevice-process-errors/1",
+      "kind": "unknown",
+      "outcome": "unknown",
+      "retryable": false,
+      "scope": {
+        "operationId": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "deviceId": "example-device",
+        "deploymentId": "example-deployment",
+        "planDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "snapshotDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "compositionDigest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "profileId": "stable-device-cn",
+        "profileDigest": "3333333333333333333333333333333333333333333333333333333333333333",
+        "profileVersion": 1,
+        "expectedGeneration": 1,
+        "targetGeneration": 2,
+        "deadline": "2026-10-13T20:00:00Z"
+      }
+    }
+  }
+}

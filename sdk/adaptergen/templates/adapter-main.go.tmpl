@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: Apache-2.0
+
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+
+	adapter {{quote .Module}}
+	"knowndevice.local/knowndevice/adapters/process"
+)
+
+func main() {
+	executable, err := os.Executable()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "adapter executable identity unavailable")
+		os.Exit(2)
+	}
+	digest, err := process.ExecutableDigest(executable)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "adapter executable identity refused")
+		os.Exit(2)
+	}
+	if process.Serve(context.Background(), os.Stdin, os.Stdout, process.ServerOptions{ArtifactDigest: digest, Factory: adapter.New}) != nil {
+		fmt.Fprintln(os.Stderr, "adapter process stopped after protocol refusal")
+		os.Exit(1)
+	}
+}

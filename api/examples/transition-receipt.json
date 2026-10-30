@@ -1,0 +1,14 @@
+{
+  "apiVersion": "knowndevice/v1alpha1",
+  "scope": "reference-device-path",
+  "deviceId": "gateway-1",
+  "operationId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "planDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "phase": "registered",
+  "outcome": "blocked",
+  "health": "unknown",
+  "activeGeneration": 1,
+  "targetGeneration": 2,
+  "previousRetired": false,
+  "reason": "authorization-or-application-denied"
+}

@@ -1,0 +1,24 @@
+name: Feature or integration
+description: Describe an operator need, a real stack and testable acceptance criteria.
+title: "proposal: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Operator problem
+      description: Explain the current workflow and where it fails.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and failure cases
+      description: Include relevant key, clock, offline, retry, migration and trust constraints.
+    validations:
+      required: true

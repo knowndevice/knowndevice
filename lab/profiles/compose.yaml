@@ -1,0 +1,86 @@
+name: knowndevice-profiles
+services:
+  step-ca:
+    platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["step-ca"]
+    command: ["/lab/ca/ca.json"]
+    volumes:
+      - ${KNOWNDEVICE_PROFILE_DIR:?Set a new profile lab directory}/ca:/lab/ca
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/operational-root.crt:/lab/operational-root.crt:ro
+    healthcheck:
+      test: ["CMD", "step", "ca", "health", "--ca-url", "https://step-ca:9000", "--root", "/lab/operational-root.crt"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+  profile-control:
+    platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["/usr/local/bin/kd-profilelab"]
+    command: ["control", "--dir", "/lab"]
+    healthcheck:
+      disable: true
+    depends_on:
+      step-ca:
+        condition: service_healthy
+    volumes:
+      - ${KNOWNDEVICE_PROFILE_BIN_DIR:-../../bin}/kd-profilelab-linux-${KNOWNDEVICE_PROFILE_ARCH:-arm64}:/usr/local/bin/kd-profilelab:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/services.json:/lab/services.json:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/ca/profile.tpl:/lab/ca/profile.tpl:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/operational-root.crt:/lab/operational-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/control-root.crt:/lab/control-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/application-root.crt:/lab/application-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/transport-root.crt:/lab/transport-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/issuance-root.crt:/lab/issuance-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/observer-root.crt:/lab/observer-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/recovery-root.crt:/lab/recovery-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/recovery/cert.pem:/lab/recovery/cert.pem:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/control:/lab/control
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/observer:/lab/observer:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/authority-caller:/lab/authority-caller:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/transport:/lab/transport:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/issuance:/lab/issuance:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/fixtures:/lab/fixtures:ro
+  profile-application:
+    platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["/usr/local/bin/kd-profilelab"]
+    command: ["application", "--dir", "/lab"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_PROFILE_BIN_DIR:-../../bin}/kd-profilelab-linux-${KNOWNDEVICE_PROFILE_ARCH:-arm64}:/usr/local/bin/kd-profilelab:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/services.json:/lab/services.json:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/ca/profile.tpl:/lab/ca/profile.tpl:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/operational-root.crt:/lab/operational-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/control-root.crt:/lab/control-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/application-root.crt:/lab/application-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/transport-root.crt:/lab/transport-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/issuance-root.crt:/lab/issuance-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/observer-root.crt:/lab/observer-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/recovery-root.crt:/lab/recovery-root.crt:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/recovery/cert.pem:/lab/recovery/cert.pem:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/device/slots:/lab/device/slots:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/application:/lab/application
+      - ${KNOWNDEVICE_PROFILE_DIR:?}/fixtures:/lab/fixtures:ro
+  checks:
+    platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    profiles: ["tools"]
+    user: "0:0"
+    entrypoint: ["/usr/local/bin/kd-profilelab"]
+    command: ["check", "--dir", "/lab"]
+    environment:
+      KNOWNDEVICE_PROFILE_RUNTIME: ${KNOWNDEVICE_PROFILE_RUNTIME:-unknown-caller-unlabeled-runtime}
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_PROFILE_BIN_DIR:-../../bin}/kd-profilelab-linux-${KNOWNDEVICE_PROFILE_ARCH:-arm64}:/usr/local/bin/kd-profilelab:ro
+      - ${KNOWNDEVICE_PROFILE_BIN_DIR:-../../bin}/knowndevice-linux-${KNOWNDEVICE_PROFILE_ARCH:-arm64}:/usr/local/bin/knowndevice:ro
+      - ${KNOWNDEVICE_PROFILE_BIN_DIR:-../../bin}/kd-adapter-linux-${KNOWNDEVICE_PROFILE_ARCH:-arm64}:/usr/local/bin/kd-adapter:ro
+      - ${KNOWNDEVICE_PROFILE_DIR:?}:/lab

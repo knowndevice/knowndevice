@@ -1,0 +1,88 @@
+name: knowndevice-reference
+services:
+  step-ca:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["step-ca"]
+    command: ["/lab/ca/ca.json"]
+    volumes:
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/ca:/lab/ca
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/root.crt:/lab/root.crt:ro
+    healthcheck:
+      test: ["CMD", "step", "ca", "health", "--ca-url", "https://step-ca:9000", "--root", "/lab/root.crt"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+  broker-control:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: eclipse-mosquitto:2.0.22@sha256:199ea8ef2e35ec2b1b37e59cfd1dbae538ed4dfa4a2251a121a52215a6248a21
+    user: "0:0"
+    entrypoint: ["/lab/kd-reference"]
+    command: ["control", "--dir", "/lab"]
+    depends_on:
+      step-ca:
+        condition: service_healthy
+    volumes:
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/kd-reference-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/lab/kd-reference:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/root.crt:/lab/root.crt:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/control:/lab/control
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/fixtures:/lab/fixtures:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/broker:/lab/broker
+  application:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["/lab/kd-reference"]
+    command: ["application", "--dir", "/lab"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/kd-reference-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/lab/kd-reference:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/root.crt:/lab/root.crt:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device:/lab/device:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/application:/lab/application
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/fixtures:/lab/fixtures:ro
+  responder:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    user: "0:0"
+    entrypoint: ["/lab/kd-reference"]
+    command: ["responder", "--dir", "/lab"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/kd-reference-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/lab/kd-reference:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/root.crt:/lab/root.crt:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/responder:/lab/responder:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/fixtures:/lab/fixtures:ro
+  device:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    profiles: ["tools"]
+    user: "0:0"
+    entrypoint: ["/lab/knowndevice"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/knowndevice-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/lab/knowndevice:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/root.crt:/lab/root.crt:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device.json:/lab/device.json:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/device:/lab/device
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/recovery:/lab/recovery:ro
+  checks:
+    platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
+    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    profiles: ["tools"]
+    user: "0:0"
+    entrypoint: ["/usr/local/bin/kd-reference"]
+    command: ["check", "--dir", "/lab"]
+    healthcheck:
+      disable: true
+    volumes:
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/kd-reference-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/usr/local/bin/kd-reference:ro
+      - ${KNOWNDEVICE_LAB_BIN_DIR:-../bin}/knowndevice-linux-${KNOWNDEVICE_LAB_ARCH:-arm64}:/usr/local/bin/knowndevice:ro
+      - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}:/lab

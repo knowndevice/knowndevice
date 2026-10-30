@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: Apache-2.0
+
+// Package adapter composes the existing profilehttp reference roles.
+// It provides no new service, trust profile, or operating-system isolation.
+package adapter
+
+import (
+	"time"
+
+	"knowndevice.local/knowndevice/adapters/profilehttp"
+	"knowndevice.local/knowndevice/sdk/device"
+)
+
+// New selects the reviewed HTTP roles and clock under the supplied immutable snapshot.
+func New(snapshot *device.PublicSnapshot) (device.Adapters, error) {
+	client, err := profilehttp.New(snapshot)
+	if err != nil {
+		return device.Adapters{}, err
+	}
+	clock := device.SystemClock{Uncertainty: time.Second, MaximumAge: time.Duration(snapshot.Limits.MaximumAssessmentAgeSeconds) * time.Second, DriftPPM: float64(snapshot.Limits.DriftPPM)}
+	return device.Adapters{Entitlement: client, Authority: client, Platform: client, Transport: client, Application: client, Clock: clock, Withdrawal: client}, nil
+}

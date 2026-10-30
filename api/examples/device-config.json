@@ -1,0 +1,15 @@
+{
+  "apiVersion": "knowndevice/v1alpha1",
+  "deviceId": "gateway-1",
+  "stateDir": "state",
+  "controlURL": "https://broker-control:9443",
+  "applicationURL": "https://application:9443",
+  "applicationId": "mqtt-worker",
+  "mqttEndpoint": "tls://broker-control:8883",
+  "rootCertificate": "root.crt",
+  "recoveryCertificate": "recovery/cert.pem",
+  "recoveryKey": "recovery/key.pem",
+  "clockTrust": "trusted-system-clock",
+  "requestTimeoutSeconds": 5,
+  "planTTLSeconds": 600
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:simulation-report:v1alpha1",
+  "title": "Known Device in-memory simulation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "scope", "scenario", "fixturePassed", "outcome", "reason", "checkpoints"],
+  "properties": {
+    "schemaVersion": {"const": "knowndevice/v1alpha1"},
+    "scope": {"const": "in-memory-model"},
+    "scenario": {"enum": ["rotation", "acl-denied", "clock-untrusted", "revoked", "missing-recovery"]},
+    "fixturePassed": {"type": "boolean"},
+    "outcome": {"enum": ["completed", "blocked"]},
+    "reason": {"type": "string", "minLength": 1},
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["phase", "activeGeneration", "targetGeneration", "previousGeneration", "previousRetired"],
+        "properties": {
+          "phase": {"enum": ["ready", "planned", "staged", "registered", "verified", "committed", "retired"]},
+          "activeGeneration": {"type": "integer", "minimum": 1},
+          "targetGeneration": {"type": "integer", "minimum": 2},
+          "previousGeneration": {"type": "integer", "minimum": 1},
+          "previousRetired": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

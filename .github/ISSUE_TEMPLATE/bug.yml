@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible defect without credentials or identifying fleet logs.
+title: "bug: "
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version and environment
+      description: Include OS, hardware, filesystem, adapter, CA and broker versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Smallest steps or redacted fixture that shows the defect.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Include operation phase and uncertainty; never include keys or recovery credentials.

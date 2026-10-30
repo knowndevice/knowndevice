@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: Apache-2.0
+
+package adapter_test
+
+import (
+	"bytes"
+	"context"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"testing"
+	"time"
+
+	adapter {{quote .Module}}
+	"knowndevice.local/knowndevice/adapters/process"
+	"knowndevice.local/knowndevice/sdk/adaptergen"
+	"knowndevice.local/knowndevice/sdk/conformance"
+	"knowndevice.local/knowndevice/sdk/conformance/fixture"
+	"knowndevice.local/knowndevice/sdk/device"
+)
+
+type expectations struct {
+	Scope string `json:"scope"`
+	Profiles []string `json:"profiles"`
+	Cases []string `json:"cases"`
+}
+
+func checkReport(t *testing.T, expected expectations, report conformance.Report) {
+	t.Helper()
+	if report.Scope != expected.Scope || len(report.Results) != len(expected.Profiles)*len(expected.Cases) {
+		t.Fatal("conformance report scope or coverage mismatch")
+	}
+	seen := map[string]bool{}
+	for _, result := range report.Results {
+		key := result.ProfileID + "/" + result.Case
+		if result.Status != "pass" || seen[key] {
+			t.Fatal("conformance case failed or was repeated")
+		}
+		seen[key] = true
+	}
+	for _, profile := range expected.Profiles {
+		for _, name := range expected.Cases {
+			if !seen[profile+"/"+name] {
+				t.Fatal("required fixture case was not observed")
+			}
+		}
+	}
+}
+
+func TestPublicConformance(t *testing.T) {
+	data, err := os.ReadFile("fixtures/expectations.json")
+	if err != nil {
+		t.Fatal("fixture expectations unavailable")
+	}
+	var expected expectations
+	if device.DecodeStrict(bytes.NewReader(data), &expected) != nil || !reflect.DeepEqual(expected.Cases, conformance.Cases()) {
+		t.Fatal("fixture expectations do not match the public case contract")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	builtin, err := conformance.Run(ctx, fixture.Factory{Connect: func(_ context.Context, snapshot *device.PublicSnapshot) (device.Adapters, func() error, error) {
+		roles, err := adapter.New(snapshot)
+		return roles, func() error { return nil }, err
+	}})
+	if err != nil {
+		t.Fatal("built-in public conformance failed")
+	}
+	checkReport(t, expected, builtin)
+	workDir, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal("process test directory refused")
+	}
+	executable := filepath.Join(workDir, "adapter")
+	build := exec.CommandContext(ctx, "go", "build", "-trimpath", "-o", executable, "./cmd/adapter")
+	if build.Run() != nil {
+		t.Fatal("generated process adapter build failed")
+	}
+	digest, err := process.ExecutableDigest(executable)
+	if err != nil {
+		t.Fatal("generated process adapter identity refused")
+	}
+	remote, err := conformance.Run(ctx, fixture.Factory{ProcessArtifactDigest: digest, Connect: func(ctx context.Context, snapshot *device.PublicSnapshot) (device.Adapters, func() error, error) {
+		if _, err := adaptergen.Bind({{quote .Name}}, snapshot, digest); err != nil {
+			return device.Adapters{}, nil, err
+		}
+		client, err := process.Start(ctx, process.Options{Executable: executable, ArtifactDigest: digest, WorkDir: workDir, Snapshot: snapshot, Log: io.Discard})
+		if err != nil {
+			return device.Adapters{}, nil, err
+		}
+		return client.Adapters(), client.Close, nil
+	}})
+	if err != nil {
+		t.Fatal("process public conformance failed")
+	}
+	checkReport(t, expected, remote)
+}

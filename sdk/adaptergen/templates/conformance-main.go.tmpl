@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: Apache-2.0
+
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"time"
+
+	adapter {{quote .Module}}
+	"knowndevice.local/knowndevice/adapters/process"
+	"knowndevice.local/knowndevice/sdk/conformance"
+	"knowndevice.local/knowndevice/sdk/conformance/fixture"
+	"knowndevice.local/knowndevice/sdk/device"
+)
+
+func run(args []string, output io.Writer) error {
+	flags := flag.NewFlagSet("conformance", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	executable := flags.String("adapter", "", "Absolute pinned adapter executable")
+	if flags.Parse(args) != nil || flags.NArg() != 0 || !filepath.IsAbs(*executable) {
+		return fmt.Errorf("select --adapter with an absolute executable path")
+	}
+	digest, err := process.ExecutableDigest(*executable)
+	if err != nil {
+		return fmt.Errorf("adapter executable identity refused")
+	}
+	if err := os.MkdirAll(".cache", 0700); err != nil {
+		return fmt.Errorf("conformance work directory refused")
+	}
+	workDir, err := os.MkdirTemp(".cache", "conformance-")
+	if err != nil {
+		return fmt.Errorf("conformance work directory refused")
+	}
+	workDir, err = filepath.Abs(workDir)
+	if err == nil {
+		workDir, err = filepath.EvalSymlinks(workDir)
+	}
+	if err != nil {
+		return fmt.Errorf("conformance work directory refused")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	builtin, builtinErr := conformance.Run(ctx, fixture.Factory{Connect: func(_ context.Context, snapshot *device.PublicSnapshot) (device.Adapters, func() error, error) {
+		roles, err := adapter.New(snapshot)
+		return roles, func() error { return nil }, err
+	}})
+	remote, remoteErr := conformance.Run(ctx, fixture.Factory{ProcessArtifactDigest: digest, Connect: func(ctx context.Context, snapshot *device.PublicSnapshot) (device.Adapters, func() error, error) {
+		client, err := process.Start(ctx, process.Options{Executable: *executable, ArtifactDigest: digest, WorkDir: workDir, Snapshot: snapshot, Log: io.Discard})
+		if err != nil {
+			return device.Adapters{}, nil, err
+		}
+		return client.Adapters(), client.Close, nil
+	}})
+	report := struct {
+		Builtin conformance.Report `json:"builtin"`
+		Process conformance.Report `json:"process"`
+	}{builtin, remote}
+	if json.NewEncoder(output).Encode(report) != nil {
+		return fmt.Errorf("conformance report write failed")
+	}
+	if builtinErr != nil || remoteErr != nil {
+		return fmt.Errorf("adapter conformance failed")
+	}
+	return nil
+}
+
+func main() {
+	if err := run(os.Args[1:], os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+}

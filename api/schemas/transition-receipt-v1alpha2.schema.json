@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:transition-receipt:v1alpha2",
+  "title": "Known Device profile transition receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "scope",
+    "deviceId",
+    "outcome",
+    "health",
+    "activeGeneration",
+    "previousRetired",
+    "deploymentId",
+    "profileId",
+    "profileVersion",
+    "profileDigest"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "knowndevice/v1alpha2"
+    },
+    "scope": {
+      "const": "profile-device-path"
+    },
+    "deviceId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "phase": {
+      "enum": [
+        "planned",
+        "key-ready",
+        "issue-intent",
+        "issued",
+        "register-intent",
+        "registered",
+        "verified",
+        "activate-intent",
+        "activated",
+        "committed",
+        "withdrawal-intent",
+        "withdrawn",
+        "ca-revoke-intent",
+        "ca-revoked",
+        "destroy-intent",
+        "retired"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "idle",
+        "running",
+        "succeeded",
+        "blocked",
+        "unknown",
+        "intervention_required"
+      ]
+    },
+    "health": {
+      "enum": [
+        "unknown",
+        "application-confirmed"
+      ]
+    },
+    "activeGeneration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetGeneration": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "previousRetired": {
+      "type": "boolean"
+    },
+    "reason": {
+      "enum": [
+        "remote-outcome-unknown",
+        "capability-unsupported",
+        "authorization-or-application-denied",
+        "generation-or-writer-conflict",
+        "local-or-adapter-failure",
+        "plan-expired-intervention-required"
+      ]
+    },
+    "deploymentId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "profileId": {
+      "enum": [
+        "reference-generation-cn",
+        "stable-device-cn"
+      ]
+    },
+    "profileVersion": {
+      "const": 1
+    },
+    "profileDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "compositionDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "snapshotDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "dependentRequired": {
+    "operationId": [
+      "planDigest",
+      "phase",
+      "targetGeneration",
+      "compositionDigest",
+      "snapshotDigest"
+    ],
+    "planDigest": [
+      "operationId"
+    ],
+    "phase": [
+      "operationId"
+    ],
+    "targetGeneration": [
+      "operationId"
+    ]
+  }
+}

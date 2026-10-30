@@ -1,0 +1,226 @@
+{
+  "apiVersion": "knowndevice/v1alpha2",
+  "deploymentId": "new-example-deployment",
+  "deviceId": "new-example-device",
+  "stateDir": "new-state",
+  "controlURL": "https://profile-control:9443",
+  "applicationURL": "https://profile-application:9443",
+  "applicationId": "http-worker",
+  "transportEndpoint": "https://profile-control:9445",
+  "recoveryCertificate": "recovery/cert.pem",
+  "recoveryKey": "recovery/key.pem",
+  "clockTrust": "trusted-system-clock",
+  "requestTimeoutSeconds": 5,
+  "planTTLSeconds": 600,
+  "credentialProfile": {
+    "id": "stable-device-cn",
+    "version": 1,
+    "policyDigest": "c9d1d264e0875a05f02d29557d671ae1d22c68454c84e8bf98c715543f617bcc"
+  },
+  "composition": {
+    "id": "local-http-lab",
+    "version": 1,
+    "authorityTemplateDigest": "7597d0fb15ac6349f31d36b2390bf1469d852bf37dd879d9c123f455943afcd5",
+    "applicationId": "http-worker",
+    "sessionPolicy": "new-connection-no-state-transfer",
+    "observationRoute": "authenticated-application-callback",
+    "withdrawalScope": "whole-service-lab",
+    "adapters": [
+      {
+        "role": "application",
+        "id": "local-http-lab-application",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "durable-activation-and-fresh-observation"
+        ]
+      },
+      {
+        "role": "authority",
+        "id": "local-http-lab-authority",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "bounded-unknown-issuance"
+        ]
+      },
+      {
+        "role": "clock",
+        "id": "local-http-lab-clock",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "bounded-interval"
+        ]
+      },
+      {
+        "role": "entitlement",
+        "id": "local-http-lab-entitlement",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "current-entitlement"
+        ]
+      },
+      {
+        "role": "platform",
+        "id": "local-http-lab-platform",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "exact-peer-binding"
+        ]
+      },
+      {
+        "role": "transport",
+        "id": "local-http-lab-transport",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "explicit-access-observation"
+        ]
+      },
+      {
+        "role": "withdrawal",
+        "id": "local-http-lab-withdrawal",
+        "version": "1",
+        "artifactDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "capabilities": [
+          "durable-deny-and-session-inventory"
+        ]
+      }
+    ]
+  },
+  "trust": {
+    "roles": [
+      {
+        "role": "application",
+        "rootCertificates": [
+          "trust/application-root.crt"
+        ],
+        "endpoint": "https://profile-application:9443",
+        "peerName": "profile-application",
+        "leafPins": [
+          "2222222222222222222222222222222222222222222222222222222222222222"
+        ],
+        "spkiPins": [
+          "3333333333333333333333333333333333333333333333333333333333333333"
+        ],
+        "allowedIssuers": []
+      },
+      {
+        "role": "authority-transport",
+        "rootCertificates": [
+          "trust/operational-root.crt"
+        ],
+        "endpoint": "https://step-ca:9000",
+        "peerName": "step-ca",
+        "leafPins": [],
+        "spkiPins": [],
+        "allowedIssuers": [
+          "1111111111111111111111111111111111111111111111111111111111111111"
+        ]
+      },
+      {
+        "role": "control",
+        "rootCertificates": [
+          "trust/control-root.crt"
+        ],
+        "endpoint": "https://profile-control:9443",
+        "peerName": "profile-control",
+        "leafPins": [
+          "2222222222222222222222222222222222222222222222222222222222222222"
+        ],
+        "spkiPins": [
+          "3333333333333333333333333333333333333333333333333333333333333333"
+        ],
+        "allowedIssuers": []
+      },
+      {
+        "role": "issuance",
+        "rootCertificates": [
+          "trust/issuance-root.crt"
+        ],
+        "endpoint": "https://profile-control:9444",
+        "peerName": "profile-control",
+        "leafPins": [
+          "2222222222222222222222222222222222222222222222222222222222222222"
+        ],
+        "spkiPins": [
+          "3333333333333333333333333333333333333333333333333333333333333333"
+        ],
+        "allowedIssuers": [],
+        "callerLeafPins": [
+          "4444444444444444444444444444444444444444444444444444444444444444"
+        ],
+        "callerSPKIPins": [
+          "5555555555555555555555555555555555555555555555555555555555555555"
+        ]
+      },
+      {
+        "role": "observer",
+        "rootCertificates": [
+          "trust/observer-root.crt"
+        ],
+        "endpoint": "",
+        "peerName": "profile-observer",
+        "leafPins": [
+          "2222222222222222222222222222222222222222222222222222222222222222"
+        ],
+        "spkiPins": [
+          "3333333333333333333333333333333333333333333333333333333333333333"
+        ],
+        "allowedIssuers": []
+      },
+      {
+        "role": "operational",
+        "rootCertificates": [
+          "trust/operational-root.crt"
+        ],
+        "endpoint": "",
+        "peerName": "",
+        "leafPins": [],
+        "spkiPins": [],
+        "allowedIssuers": [
+          "1111111111111111111111111111111111111111111111111111111111111111"
+        ]
+      },
+      {
+        "role": "recovery",
+        "rootCertificates": [
+          "trust/recovery-root.crt"
+        ],
+        "endpoint": "",
+        "peerName": "",
+        "leafPins": [],
+        "spkiPins": [],
+        "allowedIssuers": []
+      },
+      {
+        "role": "transport",
+        "rootCertificates": [
+          "trust/transport-root.crt"
+        ],
+        "endpoint": "https://profile-control:9445",
+        "peerName": "profile-control",
+        "leafPins": [
+          "2222222222222222222222222222222222222222222222222222222222222222"
+        ],
+        "spkiPins": [
+          "3333333333333333333333333333333333333333333333333333333333333333"
+        ],
+        "allowedIssuers": []
+      }
+    ]
+  },
+  "limits": {
+    "minLifetimeSeconds": 300,
+    "maxLifetimeSeconds": 1260,
+    "maxBackdateSeconds": 60,
+    "minimumRemainingSeconds": 120,
+    "maximumUncertaintyMillis": 2000,
+    "maximumAssessmentAgeSeconds": 10,
+    "driftPPM": 50,
+    "challengeSeconds": 30
+  }
+}

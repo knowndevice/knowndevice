@@ -1,0 +1,62 @@
+# Build outputs, local caches and environments
+/.cache/
+/.work/
+/bin/
+/dist/
+/.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Private inputs, research, specifications and planning
+# Keep new internal source materials in .private/.
+/.private/
+/specs/
+/specifications/
+/docs/specs/
+/docs/research/
+/docs/product/
+/docs/maintainers/
+/docs/work/
+/planning/
+/docs/ops/github.md
+/docs/ops/catalogue.md
+/docs/ops/catalogue.json
+
+# Local contributor clients, roles, skills and prompts
+/.agents/
+/.codex/
+/.claude/
+/tools/agent-config/
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE.local.md
+/.unwordy.md
+
+# Internal setup, session and publishing tools with their tests
+/scripts/setup_agents.py
+/scripts/agent_guard.py
+/scripts/session_status.py
+/scripts/text_model.py
+/scripts/github_bootstrap.py
+/tests/scripts/test_setup_agents.py
+/tests/scripts/test_agent_guard.py
+/tests/scripts/test_text_model.py
+/tests/scripts/test_github_bootstrap.py
+
+# Credentials and local device state
+.env
+.env.*
+!.env.example
+.aws/
+.ssh/
+*.key
+*.p12
+*.pfx
+*.db
+*.db-shm
+*.db-wal
+
+# Public: README, ROADMAP, contribution rules, source, tests, CI,
+# architecture, ADRs, threat model, CLI docs, api/ and protocol/.
+# Never force-add ignored internal files to the public repository.

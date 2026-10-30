@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:plan:v1alpha2",
+  "title": "Known Device profile-bound plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "operationId",
+    "deviceId",
+    "mode",
+    "expectedGeneration",
+    "targetGeneration",
+    "targetSlot",
+    "configDigest",
+    "expiresAt",
+    "digest",
+    "deploymentId",
+    "profileId",
+    "profileVersion",
+    "profileDigest",
+    "compositionDigest",
+    "snapshotDigest",
+    "controlTrustDigest",
+    "applicationTrustDigest",
+    "issuanceTrustDigest",
+    "recoveryTrustDigest",
+    "transportTrustDigest",
+    "digestEncodingVersion"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "knowndevice/v1alpha2"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "deviceId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "mode": {
+      "enum": [
+        "enroll",
+        "rotate",
+        "recover"
+      ]
+    },
+    "expectedGeneration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetGeneration": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "targetSlot": {
+      "enum": [
+        "A",
+        "B"
+      ]
+    },
+    "configDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "deploymentId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "profileId": {
+      "enum": [
+        "reference-generation-cn",
+        "stable-device-cn"
+      ]
+    },
+    "profileVersion": {
+      "const": 1
+    },
+    "profileDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "compositionDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "snapshotDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "controlTrustDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "applicationTrustDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "issuanceTrustDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "recoveryTrustDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "transportTrustDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "digestEncodingVersion": {
+      "const": 2
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "enroll"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expectedGeneration": {
+            "const": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "expectedGeneration": {
+            "minimum": 1
+          }
+        }
+      }
+    }
+  ]
+}

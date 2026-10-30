@@ -1,0 +1,3350 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:process:0.1-alpha.1",
+  "title": "Known Device negotiated process messages, 0.1-alpha.1",
+  "description": "One UTF-8 JSON-RPC object per bounded NDJSON line. RFC 0006 adds exact scope, byte totals, trust, action and deadline checks.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/notification"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ],
+  "$defs": {
+    "plan": {
+      "title": "Known Device profile-bound plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "operationId",
+        "deviceId",
+        "mode",
+        "expectedGeneration",
+        "targetGeneration",
+        "targetSlot",
+        "configDigest",
+        "expiresAt",
+        "digest",
+        "deploymentId",
+        "profileId",
+        "profileVersion",
+        "profileDigest",
+        "compositionDigest",
+        "snapshotDigest",
+        "controlTrustDigest",
+        "applicationTrustDigest",
+        "issuanceTrustDigest",
+        "recoveryTrustDigest",
+        "transportTrustDigest",
+        "digestEncodingVersion"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": "knowndevice/v1alpha2"
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "mode": {
+          "enum": [
+            "enroll",
+            "rotate",
+            "recover"
+          ]
+        },
+        "expectedGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetGeneration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "targetSlot": {
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "configDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "controlTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "applicationTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "issuanceTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "recoveryTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "transportTrustDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "digestEncodingVersion": {
+          "const": 2
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "enroll"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "expectedGeneration": {
+                "const": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "expectedGeneration": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deploymentId",
+        "deviceId",
+        "operationId",
+        "planDigest",
+        "configDigest",
+        "snapshotDigest",
+        "profileId",
+        "profileVersion",
+        "profileDigest",
+        "generation",
+        "publicKeyDigest",
+        "certificateFingerprint",
+        "csrDigest"
+      ],
+      "properties": {
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "publicKeyDigest": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        },
+        "certificateFingerprint": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        },
+        "csrDigest": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "deviceId",
+        "generation",
+        "endpoint",
+        "nonce",
+        "deadline"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "endpoint": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "role",
+        "action",
+        "requestId",
+        "plan",
+        "subject",
+        "revision",
+        "reference",
+        "source",
+        "observedAt",
+        "deadline",
+        "status"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": "knowndevice/v1alpha2"
+        },
+        "role": {
+          "enum": [
+            "entitlement",
+            "authority",
+            "platform",
+            "transport",
+            "application",
+            "clock",
+            "withdrawal"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "subject": {
+          "$ref": "#/$defs/binding"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "completed",
+            "accepted",
+            "denied",
+            "unknown",
+            "not-started"
+          ]
+        },
+        "issuanceEarliest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        },
+        "issuanceLatest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 64
+        }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "phase",
+        "applicationId",
+        "activationRevision",
+        "active",
+        "instanceId",
+        "connectionId",
+        "sessionId",
+        "challenge",
+        "acceptedScope"
+      ],
+      "properties": {
+        "evidence": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "properties": {
+                "role": {
+                  "const": "application"
+                },
+                "action": {
+                  "const": "observe"
+                },
+                "status": {
+                  "const": "completed"
+                },
+                "revision": {
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        },
+        "phase": {
+          "const": "activated"
+        },
+        "applicationId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "activationRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "active": {
+          "$ref": "#/$defs/binding"
+        },
+        "instanceId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$",
+          "minLength": 1
+        },
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$",
+          "minLength": 1
+        },
+        "sessionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$",
+          "minLength": 1
+        },
+        "challenge": {
+          "$ref": "#/$defs/probe"
+        },
+        "acceptedScope": {
+          "const": [
+            "fresh-challenge"
+          ]
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "kind",
+        "connectionId",
+        "challenge"
+      ],
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "kind": {
+          "enum": [
+            "accepted",
+            "denied",
+            "unknown",
+            "terminated"
+          ]
+        },
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "challenge": {
+          "$ref": "#/$defs/probe"
+        }
+      }
+    },
+    "withdrawal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "previous",
+        "target",
+        "policyRevision",
+        "scope",
+        "sessionsTerminated",
+        "denial",
+        "current"
+      ],
+      "properties": {
+        "evidence": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "properties": {
+                "role": {
+                  "const": "withdrawal"
+                },
+                "action": {
+                  "const": "withdraw"
+                },
+                "status": {
+                  "const": "ok"
+                }
+              }
+            }
+          ]
+        },
+        "previous": {
+          "$ref": "#/$defs/binding"
+        },
+        "target": {
+          "$ref": "#/$defs/binding"
+        },
+        "policyRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "scope": {
+          "const": "whole-service-lab"
+        },
+        "sessionsTerminated": {
+          "const": true
+        },
+        "denial": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/access"
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "denied"
+                },
+                "evidence": {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/evidence"
+                    },
+                    {
+                      "properties": {
+                        "role": {
+                          "const": "transport"
+                        },
+                        "action": {
+                          "const": "challenge"
+                        },
+                        "status": {
+                          "const": "denied"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "current": {
+          "$ref": "#/$defs/application"
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connectionId",
+        "authenticated"
+      ],
+      "properties": {
+        "connectionId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "authenticated": {
+          "type": "boolean"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "certificateFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicKeyDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "authenticated": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "certificateFingerprint",
+              "publicKeyDigest"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "binding"
+                  ]
+                },
+                {
+                  "required": [
+                    "certificateFingerprint"
+                  ]
+                },
+                {
+                  "required": [
+                    "publicKeyDigest"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sessionInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence",
+        "scope",
+        "complete",
+        "connections"
+      ],
+      "properties": {
+        "evidence": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/evidence"
+            },
+            {
+              "properties": {
+                "role": {
+                  "const": "transport"
+                },
+                "action": {
+                  "const": "session-inventory"
+                },
+                "status": {
+                  "const": "ok"
+                }
+              }
+            }
+          ]
+        },
+        "scope": {
+          "const": "whole-service-lab"
+        },
+        "complete": {
+          "const": true
+        },
+        "connections": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/connection"
+          }
+        }
+      }
+    },
+    "empty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {}
+    },
+    "healthResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "const": "ok"
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "policyDigest"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "version": {
+          "const": 1
+        },
+        "policyDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "authorityTemplateDigest",
+        "applicationId",
+        "sessionPolicy",
+        "observationRoute",
+        "withdrawalScope",
+        "adapters"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "local-http-lab",
+            "local-http-process-lab"
+          ]
+        },
+        "version": {
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "authorityTemplateDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "applicationId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "sessionPolicy": {
+          "const": "new-connection-no-state-transfer"
+        },
+        "observationRoute": {
+          "const": "authenticated-application-callback"
+        },
+        "withdrawalScope": {
+          "const": "whole-service-lab"
+        },
+        "adapters": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "id",
+              "version",
+              "artifactDigest",
+              "capabilities"
+            ],
+            "properties": {
+              "role": {
+                "enum": [
+                  "entitlement",
+                  "authority",
+                  "platform",
+                  "transport",
+                  "application",
+                  "clock",
+                  "withdrawal"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              },
+              "artifactDigest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "capabilities": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 96
+                }
+              }
+            }
+          }
+        },
+        "authorityLifetimeSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "processArtifactDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "local-http-process-lab"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "processArtifactDigest",
+              "authorityLifetimeSeconds"
+            ],
+            "properties": {
+              "version": {
+                "const": 1
+              },
+              "authorityLifetimeSeconds": {
+                "minimum": 300,
+                "maximum": 1200
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "processArtifactDigest"
+              ]
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "version": {
+                      "const": 1
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "authorityLifetimeSeconds": {
+                      "const": 0
+                    }
+                  }
+                },
+                "else": {
+                  "required": [
+                    "authorityLifetimeSeconds"
+                  ],
+                  "properties": {
+                    "authorityLifetimeSeconds": {
+                      "minimum": 300,
+                      "maximum": 1200
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "roleSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "endpoint",
+        "peerName",
+        "leafPins",
+        "spkiPins",
+        "allowedIssuers",
+        "anchors"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "control",
+            "application",
+            "issuance",
+            "operational",
+            "recovery",
+            "transport",
+            "observer",
+            "authority-transport"
+          ]
+        },
+        "endpoint": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "peerName": {
+          "type": "string",
+          "maxLength": 253
+        },
+        "leafPins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "spkiPins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "allowedIssuers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "callerLeafPins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "callerSPKIPins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "anchors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "maxLength": 87384
+          }
+        }
+      }
+    },
+    "publicSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "encodingVersion",
+        "deploymentId",
+        "deviceId",
+        "profile",
+        "composition",
+        "trust",
+        "recoveryIdentity",
+        "recoveryLeafPin",
+        "recoverySPKIPin",
+        "limits",
+        "requestTimeoutSeconds",
+        "planTTLSeconds",
+        "clockTrust"
+      ],
+      "properties": {
+        "apiVersion": {
+          "const": "knowndevice/v1alpha2"
+        },
+        "encodingVersion": {
+          "const": 2
+        },
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "composition": {
+          "$ref": "#/$defs/composition"
+        },
+        "trust": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/roleSnapshot"
+          }
+        },
+        "recoveryIdentity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "recoveryLeafPin": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "recoverySPKIPin": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minLifetimeSeconds",
+            "maxLifetimeSeconds",
+            "maxBackdateSeconds",
+            "minimumRemainingSeconds",
+            "maximumUncertaintyMillis",
+            "maximumAssessmentAgeSeconds",
+            "driftPPM",
+            "challengeSeconds"
+          ],
+          "properties": {
+            "minLifetimeSeconds": {
+              "type": "integer",
+              "minimum": 300,
+              "maximum": 1260
+            },
+            "maxLifetimeSeconds": {
+              "type": "integer",
+              "minimum": 300,
+              "maximum": 1260
+            },
+            "maxBackdateSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            },
+            "minimumRemainingSeconds": {
+              "type": "integer",
+              "minimum": 120,
+              "maximum": 1260
+            },
+            "maximumUncertaintyMillis": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 2000
+            },
+            "maximumAssessmentAgeSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "driftPPM": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "challengeSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            }
+          }
+        },
+        "requestTimeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "planTTLSeconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 600
+        },
+        "clockTrust": {
+          "const": "trusted-system-clock"
+        }
+      }
+    },
+    "processLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxLineBytes",
+        "maxCSRBytes",
+        "maxChainBytes",
+        "maxCertificates",
+        "maxDepth",
+        "maxValues",
+        "maxObjectFields",
+        "maxArrayItems",
+        "maxStringBytes",
+        "maxInFlight",
+        "maxRequests",
+        "maxSignerCalls",
+        "maxSignatureBytes",
+        "maxDigestBytes",
+        "maxStderrBytes",
+        "maxTimeoutMillis"
+      ],
+      "properties": {
+        "maxLineBytes": {
+          "const": 1048576
+        },
+        "maxCSRBytes": {
+          "const": 16384
+        },
+        "maxChainBytes": {
+          "const": 65536
+        },
+        "maxCertificates": {
+          "const": 8
+        },
+        "maxDepth": {
+          "const": 32
+        },
+        "maxValues": {
+          "const": 10000
+        },
+        "maxObjectFields": {
+          "const": 64
+        },
+        "maxArrayItems": {
+          "const": 256
+        },
+        "maxStringBytes": {
+          "const": 262144
+        },
+        "maxInFlight": {
+          "const": 1
+        },
+        "maxRequests": {
+          "const": 4096
+        },
+        "maxSignerCalls": {
+          "const": 32
+        },
+        "maxSignatureBytes": {
+          "const": 512
+        },
+        "maxDigestBytes": {
+          "const": 64
+        },
+        "maxStderrBytes": {
+          "const": 1048576
+        },
+        "maxTimeoutMillis": {
+          "const": 60000
+        }
+      }
+    },
+    "schemaIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "const": "urn:knowndevice:process:0.1-alpha.1"
+        },
+        "version": {
+          "const": "1"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "networkOrigins",
+        "filesystemRead",
+        "filesystemWrite",
+        "signerBroker"
+      ],
+      "properties": {
+        "networkOrigins": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "filesystemRead": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "filesystemWrite": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "signerBroker": {
+          "type": "boolean"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "deviceId",
+        "deploymentId",
+        "planDigest",
+        "snapshotDigest",
+        "compositionDigest",
+        "profileId",
+        "profileDigest",
+        "profileVersion",
+        "expectedGeneration",
+        "targetGeneration",
+        "deadline"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "expectedGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetGeneration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        }
+      }
+    },
+    "slotBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deviceId",
+        "operationId",
+        "generation",
+        "slot",
+        "deploymentId",
+        "profileId",
+        "profileVersion",
+        "profileDigest",
+        "configDigest",
+        "planDigest",
+        "snapshotDigest"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "slot": {
+          "enum": [
+            "A",
+            "B"
+          ]
+        },
+        "deploymentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "profileId": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "profileVersion": {
+          "const": 1
+        },
+        "profileDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "emptySlotBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deviceId",
+        "operationId",
+        "generation",
+        "slot"
+      ],
+      "properties": {
+        "deviceId": {
+          "const": ""
+        },
+        "operationId": {
+          "const": ""
+        },
+        "generation": {
+          "const": 0
+        },
+        "slot": {
+          "const": ""
+        },
+        "deploymentId": {
+          "const": ""
+        },
+        "profileId": {
+          "const": ""
+        },
+        "profileVersion": {
+          "const": 0
+        },
+        "profileDigest": {
+          "const": ""
+        },
+        "configDigest": {
+          "const": ""
+        },
+        "planDigest": {
+          "const": ""
+        },
+        "snapshotDigest": {
+          "const": ""
+        }
+      }
+    },
+    "handle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding",
+        "publicKeyDigest"
+      ],
+      "properties": {
+        "binding": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/slotBinding"
+            },
+            {
+              "$ref": "#/$defs/emptySlotBinding"
+            }
+          ]
+        },
+        "publicKeyDigest": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "const": ""
+            }
+          ]
+        }
+      }
+    },
+    "wireCredential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "handle",
+        "chain",
+        "csr",
+        "recovery",
+        "deviceId",
+        "signerRef",
+        "publicSPKI"
+      ],
+      "properties": {
+        "handle": {
+          "$ref": "#/$defs/handle"
+        },
+        "chain": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "maxLength": 87384
+          }
+        },
+        "csr": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "contentEncoding": "base64",
+          "maxLength": 21848
+        },
+        "recovery": {
+          "type": "boolean"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "signerRef": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{32}$"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "publicSPKI": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 1368
+        }
+      }
+    },
+    "initializeParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersions",
+        "errorVersions",
+        "schemas",
+        "artifactDigest",
+        "snapshotDigest",
+        "compositionDigest",
+        "profile",
+        "permissions",
+        "limits",
+        "snapshot",
+        "requiredCapabilities"
+      ],
+      "properties": {
+        "protocolVersions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 96
+          }
+        },
+        "errorVersions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 96
+          }
+        },
+        "schemas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/schemaIdentity"
+          }
+        },
+        "artifactDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "permissions": {
+          "$ref": "#/$defs/permissions"
+        },
+        "limits": {
+          "$ref": "#/$defs/processLimits"
+        },
+        "snapshot": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 174764
+        },
+        "requiredCapabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 96
+          }
+        }
+      }
+    },
+    "initializeResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "errorVersion",
+        "schemas",
+        "artifactDigest",
+        "snapshotDigest",
+        "compositionDigest",
+        "profile",
+        "permissions",
+        "limits",
+        "capabilities"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "const": "knowndevice-process/0.1-alpha.1"
+        },
+        "errorVersion": {
+          "const": "knowndevice-process-errors/1"
+        },
+        "schemas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/schemaIdentity"
+          }
+        },
+        "artifactDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "permissions": {
+          "$ref": "#/$defs/permissions"
+        },
+        "limits": {
+          "$ref": "#/$defs/processLimits"
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 96
+          }
+        }
+      }
+    },
+    "authorizeParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "credential"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/wireCredential"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "issueParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "csr",
+        "credential"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "csr": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 21848
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/wireCredential"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "importParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "csr",
+        "credential",
+        "certificate"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "csr": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 21848
+        },
+        "credential": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/wireCredential"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "certificate": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 87384
+        }
+      }
+    },
+    "credentialParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "credential"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "credential": {
+          "$ref": "#/$defs/wireCredential"
+        }
+      }
+    },
+    "probeParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "probe",
+        "credential"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "probe": {
+          "$ref": "#/$defs/probe"
+        },
+        "credential": {
+          "$ref": "#/$defs/wireCredential"
+        }
+      }
+    },
+    "pairParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "plan",
+        "previous",
+        "target"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "plan": {
+          "$ref": "#/$defs/plan"
+        },
+        "previous": {
+          "$ref": "#/$defs/wireCredential"
+        },
+        "target": {
+          "$ref": "#/$defs/wireCredential"
+        }
+      }
+    },
+    "clockParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "floor"
+      ],
+      "properties": {
+        "floor": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        }
+      }
+    },
+    "cancelParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parentId",
+        "scope"
+      ],
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "pattern": "^h-[a-f0-9]{32}$"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        }
+      }
+    },
+    "signParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parentId",
+        "signerRef",
+        "scope",
+        "hash",
+        "digest"
+      ],
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "pattern": "^h-[a-f0-9]{32}$"
+        },
+        "signerRef": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "hash": {
+          "enum": [
+            "SHA256",
+            "SHA384",
+            "SHA512"
+          ]
+        },
+        "digest": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 88
+        }
+      }
+    },
+    "signResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signature"
+      ],
+      "properties": {
+        "signature": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 684
+        }
+      }
+    },
+    "clockResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "earliest",
+        "latest",
+        "driftPPM",
+        "maximumAgeMillis",
+        "trusted",
+        "source"
+      ],
+      "properties": {
+        "earliest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "latest": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "driftPPM": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maximumAgeMillis": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "trusted": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "planDigest",
+        "deviceId",
+        "applicationId",
+        "generation",
+        "certificateFingerprint",
+        "sessionId",
+        "probe",
+        "evidence"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "applicationId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "certificateFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "probe": {
+          "$ref": "#/$defs/probe"
+        },
+        "evidence": {
+          "$ref": "#/$defs/application"
+        }
+      }
+    },
+    "retirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "planDigest",
+        "generation",
+        "policyDurable",
+        "sessionsTerminated",
+        "tlsObservation",
+        "applicationAccessDenied",
+        "evidence"
+      ],
+      "properties": {
+        "operationId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "planDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "policyDurable": {
+          "const": true
+        },
+        "sessionsTerminated": {
+          "const": true
+        },
+        "tlsObservation": {
+          "const": "accepted"
+        },
+        "applicationAccessDenied": {
+          "const": true
+        },
+        "evidence": {
+          "$ref": "#/$defs/withdrawal"
+        }
+      }
+    },
+    "boundEmpty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "value"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "value": {
+          "$ref": "#/$defs/empty"
+        }
+      }
+    },
+    "boundCertificate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "value"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "value": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "maxLength": 87384
+        }
+      }
+    },
+    "boundProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "value"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "value": {
+          "$ref": "#/$defs/probe"
+        }
+      }
+    },
+    "boundActivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "value"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "value": {
+          "$ref": "#/$defs/activation"
+        }
+      }
+    },
+    "boundRetirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "value"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "value": {
+          "$ref": "#/$defs/retirement"
+        }
+      }
+    },
+    "errorData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "kind",
+        "outcome",
+        "retryable"
+      ],
+      "properties": {
+        "version": {
+          "const": "knowndevice-process-errors/1"
+        },
+        "kind": {
+          "enum": [
+            "parse-error",
+            "invalid-request",
+            "method-not-found",
+            "invalid-params",
+            "internal-error",
+            "unsupported",
+            "denied",
+            "conflict",
+            "unknown",
+            "adapter-failure",
+            "plan-expired",
+            "not-started",
+            "resource-limit"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "unknown",
+            "denied",
+            "unsupported",
+            "conflict",
+            "not-started",
+            "intervention-required"
+          ]
+        },
+        "retryable": {
+          "const": false
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        }
+      }
+    },
+    "rpcError": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32700
+            },
+            "message": {
+              "const": "Parse error"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "parse-error"
+                },
+                "outcome": {
+                  "const": "denied"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32600
+            },
+            "message": {
+              "const": "Invalid Request"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "invalid-request"
+                },
+                "outcome": {
+                  "const": "denied"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32601
+            },
+            "message": {
+              "const": "Method not found"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "method-not-found"
+                },
+                "outcome": {
+                  "const": "unsupported"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32602
+            },
+            "message": {
+              "const": "Invalid params"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "invalid-params"
+                },
+                "outcome": {
+                  "const": "denied"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32603
+            },
+            "message": {
+              "const": "Internal error"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "internal-error"
+                },
+                "outcome": {
+                  "const": "unknown"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32010
+            },
+            "message": {
+              "const": "Required capability unsupported"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "unsupported"
+                },
+                "outcome": {
+                  "const": "unsupported"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32011
+            },
+            "message": {
+              "const": "Authorization or application access denied"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "denied"
+                },
+                "outcome": {
+                  "const": "denied"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32012
+            },
+            "message": {
+              "const": "Operation binding or generation conflict"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "conflict"
+                },
+                "outcome": {
+                  "const": "conflict"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32013
+            },
+            "message": {
+              "const": "Remote outcome unknown; reconciliation required"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "unknown"
+                },
+                "outcome": {
+                  "const": "unknown"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32014
+            },
+            "message": {
+              "const": "Adapter failed; remote outcome unknown"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "adapter-failure"
+                },
+                "outcome": {
+                  "const": "unknown"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32015
+            },
+            "message": {
+              "const": "Original plan expired; intervention required"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "plan-expired"
+                },
+                "outcome": {
+                  "const": "intervention-required"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32016
+            },
+            "message": {
+              "const": "Bound operation effect not started"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "not-started"
+                },
+                "outcome": {
+                  "const": "not-started"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "data"
+          ],
+          "properties": {
+            "code": {
+              "const": -32017
+            },
+            "message": {
+              "const": "Resource limit exceeded; remote outcome unknown"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "version",
+                "kind",
+                "outcome",
+                "retryable",
+                "scope"
+              ],
+              "properties": {
+                "version": {
+                  "const": "knowndevice-process-errors/1"
+                },
+                "kind": {
+                  "const": "resource-limit"
+                },
+                "outcome": {
+                  "const": "unknown"
+                },
+                "retryable": {
+                  "const": false
+                },
+                "scope": {
+                  "$ref": "#/$defs/scope"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "plugin.initialize"
+            },
+            "params": {
+              "$ref": "#/$defs/initializeParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "plugin.health"
+            },
+            "params": {
+              "$ref": "#/$defs/empty"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "plugin.shutdown"
+            },
+            "params": {
+              "$ref": "#/$defs/empty"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "entitlement.authorize"
+            },
+            "params": {
+              "$ref": "#/$defs/authorizeParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "authority.issue"
+            },
+            "params": {
+              "$ref": "#/$defs/issueParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "authority.lookup"
+            },
+            "params": {
+              "$ref": "#/$defs/issueParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "authority.import"
+            },
+            "params": {
+              "$ref": "#/$defs/importParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "authority.revoke"
+            },
+            "params": {
+              "$ref": "#/$defs/pairParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "authority.revocationStatus"
+            },
+            "params": {
+              "$ref": "#/$defs/pairParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "platform.register"
+            },
+            "params": {
+              "$ref": "#/$defs/credentialParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "platform.registrationStatus"
+            },
+            "params": {
+              "$ref": "#/$defs/credentialParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "transport.probe"
+            },
+            "params": {
+              "$ref": "#/$defs/probeParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "application.activate"
+            },
+            "params": {
+              "$ref": "#/$defs/credentialParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "application.activationStatus"
+            },
+            "params": {
+              "$ref": "#/$defs/credentialParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "withdrawal.withdraw"
+            },
+            "params": {
+              "$ref": "#/$defs/pairParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "withdrawal.status"
+            },
+            "params": {
+              "$ref": "#/$defs/pairParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^h-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "clock.assess"
+            },
+            "params": {
+              "$ref": "#/$defs/clockParams"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^s-[a-f0-9]{32}$"
+            },
+            "method": {
+              "const": "signer.sign"
+            },
+            "params": {
+              "$ref": "#/$defs/signParams"
+            }
+          }
+        }
+      ]
+    },
+    "notification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "method": {
+          "const": "operation.cancel"
+        },
+        "params": {
+          "$ref": "#/$defs/cancelParams"
+        }
+      }
+    },
+    "response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "result"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^(h|s)-[a-f0-9]{32}$"
+            },
+            "result": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/initializeResult"
+                },
+                {
+                  "$ref": "#/$defs/healthResult"
+                },
+                {
+                  "$ref": "#/$defs/empty"
+                },
+                {
+                  "$ref": "#/$defs/boundEmpty"
+                },
+                {
+                  "$ref": "#/$defs/boundCertificate"
+                },
+                {
+                  "$ref": "#/$defs/boundProbe"
+                },
+                {
+                  "$ref": "#/$defs/boundActivation"
+                },
+                {
+                  "$ref": "#/$defs/boundRetirement"
+                },
+                {
+                  "$ref": "#/$defs/clockResult"
+                },
+                {
+                  "$ref": "#/$defs/signResult"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "jsonrpc",
+            "id",
+            "error"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "id": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(h|s)-[a-f0-9]{32}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "error": {
+              "$ref": "#/$defs/rpcError"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

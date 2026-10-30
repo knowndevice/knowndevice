@@ -1,0 +1,455 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:knowndevice:device-config:v1alpha2",
+  "title": "Known Device explicit profile configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "deviceId",
+    "stateDir",
+    "controlURL",
+    "applicationURL",
+    "applicationId",
+    "clockTrust",
+    "requestTimeoutSeconds",
+    "planTTLSeconds",
+    "deploymentId",
+    "credentialProfile",
+    "composition",
+    "trust",
+    "limits",
+    "transportEndpoint",
+    "recoveryCertificate",
+    "recoveryKey"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": "knowndevice/v1alpha2"
+    },
+    "deviceId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "stateDir": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "controlURL": {
+      "type": "string",
+      "pattern": "^https://",
+      "maxLength": 2048
+    },
+    "applicationURL": {
+      "type": "string",
+      "pattern": "^https://",
+      "maxLength": 2048
+    },
+    "applicationId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "mqttEndpoint": {
+      "const": ""
+    },
+    "rootCertificate": {
+      "const": ""
+    },
+    "recoveryCertificate": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "recoveryKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "clockTrust": {
+      "const": "trusted-system-clock"
+    },
+    "requestTimeoutSeconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+    },
+    "planTTLSeconds": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 600
+    },
+    "deploymentId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "credentialProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "policyDigest"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "reference-generation-cn",
+            "stable-device-cn"
+          ]
+        },
+        "version": {
+          "const": 1
+        },
+        "policyDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "authorityTemplateDigest",
+        "applicationId",
+        "sessionPolicy",
+        "observationRoute",
+        "withdrawalScope",
+        "adapters"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "local-http-lab",
+            "local-http-process-lab"
+          ]
+        },
+        "version": {
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "authorityTemplateDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "applicationId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "sessionPolicy": {
+          "const": "new-connection-no-state-transfer"
+        },
+        "observationRoute": {
+          "const": "authenticated-application-callback"
+        },
+        "withdrawalScope": {
+          "const": "whole-service-lab"
+        },
+        "adapters": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "id",
+              "version",
+              "artifactDigest",
+              "capabilities"
+            ],
+            "properties": {
+              "role": {
+                "enum": [
+                  "entitlement",
+                  "authority",
+                  "platform",
+                  "transport",
+                  "application",
+                  "clock",
+                  "withdrawal"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              },
+              "artifactDigest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "capabilities": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 96
+                }
+              }
+            }
+          }
+        },
+        "authorityLifetimeSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "processArtifactDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "local-http-process-lab"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "processArtifactDigest",
+              "authorityLifetimeSeconds"
+            ],
+            "properties": {
+              "version": {
+                "const": 1
+              },
+              "authorityLifetimeSeconds": {
+                "minimum": 300,
+                "maximum": 1200
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "processArtifactDigest"
+              ]
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "version": {
+                      "const": 1
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "authorityLifetimeSeconds": {
+                      "const": 0
+                    }
+                  }
+                },
+                "else": {
+                  "required": [
+                    "authorityLifetimeSeconds"
+                  ],
+                  "properties": {
+                    "authorityLifetimeSeconds": {
+                      "minimum": 300,
+                      "maximum": 1200
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "rootCertificates",
+              "endpoint",
+              "peerName",
+              "leafPins",
+              "spkiPins",
+              "allowedIssuers"
+            ],
+            "properties": {
+              "role": {
+                "enum": [
+                  "control",
+                  "application",
+                  "issuance",
+                  "operational",
+                  "recovery",
+                  "transport",
+                  "observer",
+                  "authority-transport"
+                ]
+              },
+              "rootCertificates": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "endpoint": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "peerName": {
+                "type": "string",
+                "maxLength": 253
+              },
+              "leafPins": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "spkiPins": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "allowedIssuers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "callerLeafPins": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "callerSPKIPins": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "maxItems": 8,
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minLifetimeSeconds",
+        "maxLifetimeSeconds",
+        "maxBackdateSeconds",
+        "minimumRemainingSeconds",
+        "maximumUncertaintyMillis",
+        "maximumAssessmentAgeSeconds",
+        "driftPPM",
+        "challengeSeconds"
+      ],
+      "properties": {
+        "minLifetimeSeconds": {
+          "type": "integer",
+          "minimum": 300,
+          "maximum": 1260
+        },
+        "maxLifetimeSeconds": {
+          "type": "integer",
+          "minimum": 300,
+          "maximum": 1260
+        },
+        "maxBackdateSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "minimumRemainingSeconds": {
+          "type": "integer",
+          "minimum": 120,
+          "maximum": 1260
+        },
+        "maximumUncertaintyMillis": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 2000
+        },
+        "maximumAssessmentAgeSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "driftPPM": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "challengeSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        }
+      }
+    },
+    "transportEndpoint": {
+      "type": "string",
+      "pattern": "^https://",
+      "maxLength": 2048
+    }
+  },
+  "dependentRequired": {
+    "recoveryCertificate": [
+      "recoveryKey"
+    ],
+    "recoveryKey": [
+      "recoveryCertificate"
+    ]
+  }
+}
