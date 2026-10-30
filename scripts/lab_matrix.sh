@@ -15,13 +15,20 @@ run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 out="${KNOWNDEVICE_MATRIX_DIR:-$root/.work/lab-matrix-$arch-$run_id}"
 if [[ -e "$out" ]]; then echo "Matrix directory already exists: $out" >&2; exit 2; fi
 mkdir -p "$out/artifacts" "$out/logs"
+out="$(cd "$out" && pwd -P)"
 
 host_arch="$(docker info --format '{{.Architecture}}')"
 case "$host_arch" in x86_64) host_arch=amd64 ;; aarch64) host_arch=arm64 ;; esac
 if [[ "$host_arch" == "$arch" ]]; then mode=native; else mode=emulated; fi
 runtime="linux/$arch $mode on $host_arch Docker host ($(docker info --format '{{.OperatingSystem}}'))"
+commit=unknown
+# An exported copy inside another checkout must not report the outer repository's commit.
+if [[ "$(git rev-parse --show-toplevel 2>/dev/null)" == "$root" ]]; then
+  commit="$(git rev-parse HEAD)"
+  if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then commit="$commit-dirty"; fi
+fi
 {
-  echo "commit: $(git rev-parse HEAD 2>/dev/null || echo unknown)"
+  echo "commit: $commit"
   echo "runtime: $runtime"
   echo "started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } > "$out/summary.txt"
@@ -44,10 +51,16 @@ compose_file=""
 stop_cell() {
   [[ -n "$project" ]] || return 0
   docker compose -p "$project" -f "$compose_file" logs --no-color > "$out/logs/$project-services.log" 2>&1 || true
-  docker compose -p "$project" -f "$compose_file" down > "$out/logs/$project-down.log" 2>&1 || true
+  local status=0
+  docker compose -p "$project" -f "$compose_file" down > "$out/logs/$project-down.log" 2>&1 || status=$?
+  if [[ "$status" -ne 0 ]]; then
+    echo "Compose down failed for $project; see $out/logs/$project-down.log" >&2
+    return "$status"
+  fi
   project=""
 }
-trap stop_cell EXIT
+# A project whose down failed stays set, so the exit trap retries it.
+trap 'stop_cell || true' EXIT
 
 run_cell() {
   local cell="$1"
@@ -56,11 +69,16 @@ run_cell() {
   docker compose -p "$project" -f "$compose_file" up -d > "$out/logs/$cell-up.log" 2>&1 \
     && docker compose -p "$project" -f "$compose_file" run --rm checks > "$out/logs/$cell-checks.log" 2>&1 \
     || status=$?
-  stop_cell
+  local down=0
+  stop_cell || down=$?
   if [[ "$status" -ne 0 ]]; then
     echo "FAIL $cell (exit $status); logs: $out/logs" | tee -a "$out/summary.txt" >&2
     tail -n 40 "$out/logs/$cell-checks.log" >&2 || true
     exit "$status"
+  fi
+  if [[ "$down" -ne 0 ]]; then
+    echo "FAIL $cell cleanup (compose down exit $down); logs: $out/logs" | tee -a "$out/summary.txt" >&2
+    exit "$down"
   fi
   echo "PASS $cell ($(grep -c '^PASS' "$out/logs/$cell-checks.log") checks)" | tee -a "$out/summary.txt"
 }
