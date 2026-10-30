@@ -38,7 +38,7 @@ jobs:
       - name: Select the version
         id: version
         run: |
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF_TYPE" == tag ]]; then
             if ! git merge-base --is-ancestor HEAD refs/remotes/origin/main; then
               echo "::error::Tag $GITHUB_REF_NAME does not point at a commit on main"
               exit 1
@@ -75,7 +75,7 @@ jobs:
           sha256sum --check --strict SHA256SUMS
 
   attest:
-    if: github.ref_type == 'tag'
+    if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 15

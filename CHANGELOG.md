@@ -4,9 +4,9 @@ Versions follow Semantic Versioning. Dates use YYYY-MM-DD.
 
 ## Unreleased
 
-No device release has been published. Stable SDK/migrations, release artifacts,
-hardware protection and power-cut validation remain outside this development
-profile.
+No device release has been published. Stable SDK/migrations, published release
+artifacts, hardware protection and power-cut validation remain outside this
+development profile.
 
 ### Reference path
 

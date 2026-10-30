@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -82,6 +83,8 @@ def sha256(data):
 def write_archive(path, items, epoch):
     """Write a gzip tar whose bytes depend only on member names, contents, modes and epoch."""
     members = {name: (source, mode) for name, source, mode in items}
+    if len(members) != len(items):
+        raise ReleaseError(f"{path.name} would contain duplicate member names")
     for name in list(members):
         for parent in PurePosixPath(name).parents:
             if str(parent) != ".":
@@ -114,8 +117,10 @@ def sbom(archive_name, version, commit, epoch, binaries):
     for name, digest, info in binaries:
         ref = f"file:bin/{name}"
         refs = set()
-        for module in [info["Main"], *info.get("Deps", [])]:
+        for module in [info["Main"], *(info.get("Deps") or [])]:
             module = module.get("Replace") or module
+            if not module.get("Version"):
+                raise ReleaseError(f"{info['Path']} uses {module['Path']} without a module version, such as a directory replace")
             key = purl(module["Path"], module["Version"])
             entry = {"type": "library", "bom-ref": key, "name": module["Path"], "version": module["Version"], "purl": key}
             if module.get("Sum"):
@@ -148,8 +153,8 @@ def write_checksums(out):
 
 def release(version, out):
     check_version(version)
-    if out.exists() and any(out.iterdir()):
-        raise ReleaseError(f"{out} is not empty")
+    if out.exists() and (not out.is_dir() or any(out.iterdir())):
+        raise ReleaseError(f"{out} is not an empty directory")
     if run(["git", "status", "--porcelain"]):
         raise ReleaseError("the working tree has uncommitted or untracked files")
     commit = run(["git", "rev-parse", "HEAD"]).strip()
@@ -160,9 +165,10 @@ def release(version, out):
     host = run(["go", "env", "GOVERSION", "GOHOSTOS", "GOHOSTARCH"], env=go_env()).split()
     if host[0] != toolchain:
         raise ReleaseError(f"go is {host[0]}; .go-version requires {toolchain}")
-    tracked = run(["git", "ls-files", "-z", "--", "api/schemas/*.schema.json", "third_party/licenses"]).split("\0")
-    out.mkdir(parents=True, exist_ok=True)
+    tracked = run(["git", "ls-files", "-z", "--", ":(glob)api/schemas/*.schema.json", "third_party/licenses"]).split("\0")
     with tempfile.TemporaryDirectory() as scratch:
+        staging = Path(scratch) / "out"
+        staging.mkdir()
         for arch in ARCHES:
             prefix = f"knowndevice_{version}_linux_{arch}"
             items, binaries = [], []
@@ -182,11 +188,14 @@ def release(version, out):
             for rel in filter(None, tracked):
                 target = f"schemas/{Path(rel).name}" if rel.startswith("api/schemas/") else rel
                 items.append((f"{prefix}/{target}", ROOT / rel, 0o644))
-            archive = out / f"{prefix}.tar.gz"
+            archive = staging / f"{prefix}.tar.gz"
             write_archive(archive, items, epoch)
             document = sbom(archive.name, version, commit, epoch, binaries)
-            (out / f"{prefix}.cdx.json").write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
-    write_checksums(out)
+            (staging / f"{prefix}.cdx.json").write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+        write_checksums(staging)
+        out.mkdir(parents=True, exist_ok=True)
+        for path in sorted(staging.iterdir()):
+            shutil.copyfile(path, out / path.name)
     return sorted(out.iterdir())
 
 
@@ -197,7 +206,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         paths = release(args.version, args.out.resolve())
-    except ReleaseError as error:
+    except (ReleaseError, OSError) as error:
         print(f"release build refused: {error}", file=sys.stderr)
         return 1
     print("\n".join(str(path) for path in paths))
