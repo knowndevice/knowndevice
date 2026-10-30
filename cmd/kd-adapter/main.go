@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/adapters/profilehttp"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/adapters/profilehttp"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func main() {

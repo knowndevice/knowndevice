@@ -10,7 +10,7 @@ import (
 	"io"
 	"os"
 
-	"knowndevice.local/knowndevice/sdk/adaptergen"
+	"github.com/knowndevice/knowndevice/sdk/adaptergen"
 )
 
 const usage = "Usage: kd-adaptergen --root ABS --dir NAME --name NAME --module DOMAIN/PATH --sdk-replace ABS\n"

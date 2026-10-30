@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func (c *connections) inventory() ([]device.ConnectionRecord, error) {

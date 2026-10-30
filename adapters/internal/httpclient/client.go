@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/internal/strictjson"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/internal/strictjson"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 const MaxBody = 256 << 10

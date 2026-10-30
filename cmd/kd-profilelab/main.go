@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"knowndevice.local/knowndevice/internal/profilelab"
+	"github.com/knowndevice/knowndevice/internal/profilelab"
 )
 
 func main() {

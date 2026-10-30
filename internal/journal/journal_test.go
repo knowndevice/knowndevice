@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 	"modernc.org/sqlite"
 )
 

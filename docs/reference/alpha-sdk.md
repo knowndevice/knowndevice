@@ -2,8 +2,8 @@
 
 `sdk/device` and `sdk/credentialprofile` expose the same strict types and
 validators used by the controller and built-in adapters. They are unreleased
-alpha packages. The module remains `knowndevice.local/knowndevice`; no canonical
-hosted repository, published module or stable SDK guarantee is configured.
+alpha packages. The module path is `github.com/knowndevice/knowndevice`; no
+module version is published and no stable SDK guarantee exists.
 [RFC 0006](../decisions/0006-alpha-sdk-process-adapters.md) defines process
 execution; [RFC 0005](../decisions/0005-credential-profiles.md) governs identity,
 trust, time, activation and withdrawal.

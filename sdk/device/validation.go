@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 	"regexp"
 	"time"
 )

@@ -25,7 +25,7 @@ stdio adapter path on a separate fresh, pinned process composition.
 
 ## Run the reference path
 
-Install Go 1.27.2, Python 3.11+, Bash, Make and Docker with Compose. No hosted
+Install Go 1.27.3, Python 3.11+, Bash, Make and Docker with Compose. No hosted
 account is required. The first build downloads pinned Go dependencies; the lab
 downloads digest-pinned images.
 
@@ -107,6 +107,7 @@ cuts on named hardware.
 Read [CONTRIBUTING](CONTRIBUTING.md), [GOVERNANCE](GOVERNANCE.md),
 [SECURITY](SECURITY.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 Known Device uses [Apache-2.0](LICENSE); dependency notices are in [NOTICE](NOTICE).
-The module path remains local until a public repository is configured.
+The module path is `github.com/knowndevice/knowndevice`; no module version is
+published yet.
 The Cloudflare site awaits the first useful release gates and a separate
 publication scope.

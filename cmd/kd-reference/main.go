@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"knowndevice.local/knowndevice/internal/reference"
+	"github.com/knowndevice/knowndevice/internal/reference"
 	"os"
 )
 

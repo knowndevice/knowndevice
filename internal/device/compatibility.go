@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 const (

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 )
 
 const V2 = "knowndevice/v1alpha2"

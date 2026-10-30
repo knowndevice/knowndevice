@@ -6,8 +6,9 @@ and `SystemClock`, then serves `knowndevice-process/0.1-alpha.1` over stdio.
 It is an alpha fixture/reference wrapper for the reviewed local composition.
 It does not implement an independent CA, application or connectivity profile.
 
-The module remains `knowndevice.local/knowndevice`. An explicit local `replace`
-proves external importability; it is not SDK publication. Go 1.27.2 and the
+The module path is `github.com/knowndevice/knowndevice`, with no published
+version. An explicit local `replace` proves external importability; it is not
+SDK publication. Go 1.27.3 and the
 pinned dependencies in `go.mod`/`go.sum` are required. The
 [alpha SDK reference](alpha-sdk.md), [RFC 0005](../decisions/0005-credential-profiles.md)
 and [process contract](../../protocol/README.md) still govern behavior.

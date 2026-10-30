@@ -18,10 +18,10 @@ import (
 	"sync"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/profilehttp"
-	"knowndevice.local/knowndevice/sdk/conformance"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/profilehttp"
+	"github.com/knowndevice/knowndevice/sdk/conformance"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 // Factory creates a new loopback PKI, identity and in-memory backend per case.

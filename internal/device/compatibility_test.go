@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	sdk "knowndevice.local/knowndevice/sdk/device"
+	sdk "github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestPublicContractRetainsInternalTypeAndErrorIdentity(t *testing.T) {

@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 )
 
 type applicationRecord struct {

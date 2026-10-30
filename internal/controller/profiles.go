@@ -13,8 +13,8 @@ import (
 	"os"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 // CompletedHistory reports exact V2 history without authentication or new effects.

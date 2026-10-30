@@ -8,7 +8,7 @@ import (
 	"errors"
 	"testing"
 
-	"knowndevice.local/knowndevice/internal/continuity"
+	"github.com/knowndevice/knowndevice/internal/continuity"
 )
 
 func TestCLIReportsBlockedFixtureWithoutClaimingDeviceSuccess(t *testing.T) {

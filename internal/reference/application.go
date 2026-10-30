@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/controlhttp"
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/mqttprobe"
-	"knowndevice.local/knowndevice/internal/controller"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/adapters/controlhttp"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/mqttprobe"
+	"github.com/knowndevice/knowndevice/internal/controller"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 )
 
 type worker struct {

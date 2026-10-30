@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 type entitlement struct {

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func TestAUD02ActiveProbeRequiresOriginalPlan(t *testing.T) {

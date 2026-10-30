@@ -8,7 +8,7 @@ This guide retains the v1alpha1 reference path. The
 [explicit credential profile guide](reference/credential-profiles.md) creates a
 separate fresh v1alpha2 lab; existing reference identities/stores are not converted.
 
-Install Go 1.27.2, Python 3.11+, Bash, Make and Docker with Compose running Linux
+Install Go 1.27.3, Python 3.11+, Bash, Make and Docker with Compose running Linux
 containers. From the repository root:
 
 ```sh

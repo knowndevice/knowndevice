@@ -12,9 +12,9 @@ import (
 	"net"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/internal/httpclient"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/internal/httpclient"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 type TokenRequest struct {

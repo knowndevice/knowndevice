@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 )
 
 func snapshotRoot(t *testing.T, name string) ([]byte, *ecdsa.PrivateKey, *x509.Certificate) {

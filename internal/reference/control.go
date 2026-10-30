@@ -28,11 +28,11 @@ import (
 	"syscall"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/controlhttp"
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/stepca"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/adapters/controlhttp"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/stepca"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 	_ "modernc.org/sqlite"
 )
 

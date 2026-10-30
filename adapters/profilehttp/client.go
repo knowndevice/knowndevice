@@ -18,10 +18,10 @@ import (
 	"sync"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 type Client struct {

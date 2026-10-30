@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"knowndevice.local/knowndevice/api/schemas"
+	"github.com/knowndevice/knowndevice/api/schemas"
 )
 
 func TestProcessSchemaMessageBoundaries(t *testing.T) {

@@ -18,8 +18,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 const stableTemplate = "{\n  \"subject\": {\"commonName\": {{ toJson .Subject.CommonName }}},\n  \"sans\": [],\n  \"keyUsage\": [\"digitalSignature\"],\n  \"extKeyUsage\": [\"clientAuth\"],\n  \"basicConstraints\": {\"isCA\": false}\n}\n"

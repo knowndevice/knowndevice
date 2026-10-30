@@ -12,14 +12,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knowndevice/knowndevice/adapters/controlhttp"
+	"github.com/knowndevice/knowndevice/adapters/mqttprobe"
+	"github.com/knowndevice/knowndevice/adapters/profilehttp"
+	"github.com/knowndevice/knowndevice/internal/continuity"
+	"github.com/knowndevice/knowndevice/internal/controller"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 	"github.com/spf13/cobra"
-	"knowndevice.local/knowndevice/adapters/controlhttp"
-	"knowndevice.local/knowndevice/adapters/mqttprobe"
-	"knowndevice.local/knowndevice/adapters/profilehttp"
-	"knowndevice.local/knowndevice/internal/continuity"
-	"knowndevice.local/knowndevice/internal/controller"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
 )
 
 const version = "0.0.0-dev"

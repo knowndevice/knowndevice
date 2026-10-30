@@ -16,8 +16,8 @@ import (
 	"syscall"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
 	_ "modernc.org/sqlite"
 )
 

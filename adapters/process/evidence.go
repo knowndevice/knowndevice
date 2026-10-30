@@ -5,7 +5,7 @@ package process
 import (
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 // ValidateActivation applies the existing complete process success contract to

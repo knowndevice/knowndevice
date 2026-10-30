@@ -145,7 +145,7 @@ func openDirectory(value string) (*os.Root, error) {
 }
 
 func validateOptions(options Options) error {
-	if !validName(options.Name) || !validName(options.Directory) || !validModule(options.Module) || options.Module == "knowndevice.local/knowndevice" || !absolutePath(options.Root) || !absolutePath(options.SDKReplace) {
+	if !validName(options.Name) || !validName(options.Directory) || !validModule(options.Module) || options.Module == "github.com/knowndevice/knowndevice" || !absolutePath(options.Root) || !absolutePath(options.SDKReplace) {
 		return ErrOptions
 	}
 	root, err := openDirectory(options.SDKReplace)
@@ -168,7 +168,7 @@ func validateOptions(options Options) error {
 		return ErrOptions
 	}
 	data, err := io.ReadAll(io.LimitReader(file, (64<<10)+1))
-	if err != nil || len(data) > 64<<10 || !bytes.HasPrefix(data, []byte("module knowndevice.local/knowndevice\n")) {
+	if err != nil || len(data) > 64<<10 || !bytes.HasPrefix(data, []byte("module github.com/knowndevice/knowndevice\n")) {
 		return ErrOptions
 	}
 	return nil

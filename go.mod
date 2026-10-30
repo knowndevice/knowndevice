@@ -1,4 +1,4 @@
-module knowndevice.local/knowndevice
+module github.com/knowndevice/knowndevice
 
 go 1.27.0
 

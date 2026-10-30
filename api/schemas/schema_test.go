@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"knowndevice.local/knowndevice/api/schemas"
-	"knowndevice.local/knowndevice/internal/controller"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/sdk/adaptergen"
+	"github.com/knowndevice/knowndevice/api/schemas"
+	"github.com/knowndevice/knowndevice/internal/controller"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/sdk/adaptergen"
 )
 
 func resolve(t *testing.T, data []byte) *jsonschema.Resolved {

@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func publicBindingFixture(t *testing.T, h device.Handle, csrData, chainData []byte) device.CredentialBinding {

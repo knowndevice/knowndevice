@@ -12,12 +12,12 @@ import (
 	"strings"
 	"testing"
 
-	"knowndevice.local/knowndevice/adapters/controlhttp"
-	"knowndevice.local/knowndevice/adapters/mqttprobe"
-	"knowndevice.local/knowndevice/adapters/profilehttp"
-	"knowndevice.local/knowndevice/adapters/stepca"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/controlhttp"
+	"github.com/knowndevice/knowndevice/adapters/mqttprobe"
+	"github.com/knowndevice/knowndevice/adapters/profilehttp"
+	"github.com/knowndevice/knowndevice/adapters/stepca"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 var (

@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestExternalModuleValidatesBothSelectedProfiles(t *testing.T) {
