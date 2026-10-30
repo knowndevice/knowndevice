@@ -22,7 +22,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.0.0-dev"
+// version is replaced in release builds with -ldflags "-X main.version=X.Y.Z".
+var version = "0.0.0-dev"
 
 type exitError struct {
 	code int
@@ -56,7 +57,7 @@ func command(stdout, stderr io.Writer) *cobra.Command {
 	root := &cobra.Command{Use: "knowndevice", Short: "Device identity continuity for the local reference lab", SilenceUsage: true, SilenceErrors: true, Args: cobra.NoArgs}
 	root.SetOut(stdout)
 	root.SetErr(stderr)
-	root.AddCommand(&cobra.Command{Use: "version", Short: "Print the development version", Args: cobra.NoArgs, RunE: func(c *cobra.Command, args []string) error {
+	root.AddCommand(&cobra.Command{Use: "version", Short: "Print the build version", Args: cobra.NoArgs, RunE: func(c *cobra.Command, args []string) error {
 		_, err := fmt.Fprintln(stdout, version)
 		if err != nil {
 			return exitError{4, err}

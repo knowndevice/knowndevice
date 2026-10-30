@@ -48,8 +48,8 @@ The first unreleased implementation now supplies the Linux reference path,
 SQLite/software slots, real PKI/MQTT adapters and a process-kill failure driver.
 See [quickstart](docs/quickstart.md) for the delivered profile. This does not
 complete 0.1: clean-machine contributor timing, public repository/security
-configuration, signed artifacts/SBOM and separately authorized publication
-remain release gates. `/sign` replaces the proposed `/rekey` for this profile
+configuration, a hosted run of the release workflow (signed provenance and
+SBOM) and separately authorized publication remain release gates. `/sign` replaces the proposed `/rekey` for this profile
 because each generation needs a distinct subject; see
 [RFC 0004](docs/decisions/0004-first-device-path.md).
 

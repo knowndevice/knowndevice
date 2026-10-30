@@ -78,3 +78,8 @@ profile.
   with built-in and generated-process adapters for one Linux architecture.
   CI runs it natively on amd64 and arm64.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Add a release workflow and `scripts/release_build.py`. A version tag on
+  `main` builds Linux amd64/arm64 archives, CycloneDX SBOMs and
+  `SHA256SUMS` on both native runners, requires identical bytes, and
+  attests provenance and SBOMs through GitHub OIDC. It does not publish a
+  GitHub release. `knowndevice version` prints the release version.
