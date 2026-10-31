@@ -83,8 +83,16 @@ development profile.
   `init` and the lab checks stopped with "journal storage must be owned by the
   current user". `scripts/lab_matrix.sh` sets it to the calling user, or to
   root under rootless Docker, where container root is the calling user.
-- List the C compiler that the race tests need, and describe the
-  `remote-outcome-unknown` stop after each broker restart in the quickstart.
+- List the C compiler that the race tests need.
+- The reference lab control service answers registration and retirement only
+  after the restarted broker delivers a readiness message to the responder and
+  the responder echoes it, bounded to four fifths of the request timeout.
+  Before, the verification probe could run before the responder had
+  resubscribed, so `apply` stopped at `remote-outcome-unknown` after each
+  broker restart and needed `reconcile`. The control service may publish only
+  on its readiness topic. A retry after an `unknown` answer waits without
+  restarting the broker again, and a retried retirement no longer reports
+  `denied` when the application check fails after the policy already changed.
 - Compile the race tests before running them in `make check`. On a cold build
   cache, concurrent compilation pushed process adapter subprocess startup past
   its 5-second bound and failed the gate.

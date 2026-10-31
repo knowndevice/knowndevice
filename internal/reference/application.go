@@ -257,26 +257,42 @@ func runResponder(dir string) error {
 					loop = false
 					break
 				}
-				if msg.Retained {
-					continue
+				if topic, payload, ok := responderReply(dir, cfg, msg, time.Now()); ok {
+					_ = c.Publish(context.Background(), topic, payload)
 				}
-				var p device.Probe
-				if device.DecodeStrict(bytes.NewReader(msg.Payload), &p) != nil || p.DeviceID != cfg.DeviceID || p.Endpoint != cfg.MQTTEndpoint || device.MatchProbe(p, p, time.Now()) != nil {
-					continue
-				}
-				topic, response, _ := mqttprobe.Topics(p.DeviceID, p.Generation)
-				if msg.Topic != topic {
-					continue
-				}
-				var fixture policy
-				if readJSON(filepath.Join(dir, "fixtures", "policy.json"), &fixture) == nil && fixture.StaleReply {
-					p.Nonce = "00000000000000000000000000000000"
-				}
-				payload, _ := json.Marshal(p)
-				_ = c.Publish(context.Background(), response, payload)
 			}
 		}
 		c.Close(context.Background())
 		time.Sleep(200 * time.Millisecond)
 	}
+}
+
+func responderReply(dir string, cfg device.Config, msg mqttprobe.Message, now time.Time) (string, []byte, bool) {
+	if msg.Retained {
+		return "", nil, false
+	}
+	if msg.Topic == readyRequestTopic {
+		var ready readiness
+		if device.DecodeStrict(bytes.NewReader(msg.Payload), &ready) != nil || len(ready.Nonce) != 32 {
+			return "", nil, false
+		}
+		return readyResponseTopic, msg.Payload, true
+	}
+	var p device.Probe
+	if device.DecodeStrict(bytes.NewReader(msg.Payload), &p) != nil || p.DeviceID != cfg.DeviceID || p.Endpoint != cfg.MQTTEndpoint || device.MatchProbe(p, p, now) != nil {
+		return "", nil, false
+	}
+	topic, response, _ := mqttprobe.Topics(p.DeviceID, p.Generation)
+	if msg.Topic != topic {
+		return "", nil, false
+	}
+	var fixture policy
+	if readJSON(filepath.Join(dir, "fixtures", "policy.json"), &fixture) == nil && fixture.StaleReply {
+		p.Nonce = "00000000000000000000000000000000"
+	}
+	payload, err := json.Marshal(p)
+	if err != nil {
+		return "", nil, false
+	}
+	return response, payload, true
 }

@@ -67,6 +67,13 @@ read-only access to slots; the responder has its own certificate. Broker policy
 changes restart all MQTT clients. A probe during reconnect can return `unknown`;
 a later fresh observation is required.
 
+Registration and retirement change broker policy. The control service restarts
+the broker and answers only after the restarted broker delivers a readiness
+message to the responder and the responder echoes it. Only the control service
+may publish on that topic. Restart and wait together are bounded to four fifths
+of `requestTimeoutSeconds` (4 seconds in this lab); after that the answer is
+`unknown`. A retry of the same request waits again without another restart.
+
 ## Enrollment and rotation
 
 ```sh
@@ -76,12 +83,10 @@ docker compose -f lab/compose.yaml run --rm device status --config /lab/device.j
 docker compose -f lab/compose.yaml run --rm device probe --config /lab/device.json
 ```
 
-Registration restarts the broker, so `apply` usually stops at `registered`
-with `remote-outcome-unknown`: the verification probe runs before the responder
-has reconnected. Run the `reconcile` command below until the outcome is
-`succeeded`. Rotation, recovery and a reconcile after an interruption can stop
-once more at `broker-retired`, because retiring the previous generation restarts
-the broker again.
+`apply` ends with outcome `succeeded` when the responder reconnects within
+that bound. On a slow or overloaded host it can stop with
+`remote-outcome-unknown`; run the `reconcile` command below until the outcome
+is `succeeded`.
 
 Plans expire after ten minutes here. Do not edit their fields or digests.
 `status` reads metadata and reports health as `unknown`; `probe` sends a new
