@@ -11,8 +11,16 @@ export GOCACHE="${GOCACHE:-$root/.cache/go-build}"
 export GOMODCACHE="${GOMODCACHE:-$root/.cache/go-mod}"
 export GOTOOLCHAIN=local
 # Docker Engine on Linux keeps host file ownership, and the journal and key
-# store refuse files owned by another user, so containers run as the seeding user.
-export KNOWNDEVICE_LAB_USER="${KNOWNDEVICE_LAB_USER:-$(id -u):$(id -g)}"
+# store refuse files owned by another user, so containers run as the seeding
+# user. Rootless Docker already maps container root to that user.
+if [[ -z "${KNOWNDEVICE_LAB_USER:-}" ]]; then
+  if docker info --format '{{json .SecurityOptions}}' | grep -q 'name=rootless'; then
+    KNOWNDEVICE_LAB_USER=0:0
+  else
+    KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
+  fi
+fi
+export KNOWNDEVICE_LAB_USER
 bin_dir="${KNOWNDEVICE_BIN_DIR:-bin}"
 run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 out="${KNOWNDEVICE_MATRIX_DIR:-$root/.work/lab-matrix-$arch-$run_id}"

@@ -42,7 +42,10 @@ export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 `KNOWNDEVICE_LAB_USER` runs the containers as your user. The journal and key
 store refuse files owned by another user, and Docker Engine on Linux keeps the
 host ownership of the seeded files. Unset, the containers run as root, which
-works only where Docker maps ownership, as Docker Desktop does.
+works only where Docker maps ownership, as Docker Desktop does. Rootless Docker
+maps container root to your user
+([UID/GID mapping](https://docs.docker.com/engine/security/rootless/uid-gid-mapping/)),
+so leave the variable unset there. Rootless Docker and Podman are not tested.
 
 Compose uses `bin/` by default. Rebuilding a bind-mounted file during a run can
 invalidate the running artifact; use a new directory and fresh seed for another
@@ -76,8 +79,9 @@ docker compose -f lab/compose.yaml run --rm device probe --config /lab/device.js
 Registration restarts the broker, so `apply` usually stops at `registered`
 with `remote-outcome-unknown`: the verification probe runs before the responder
 has reconnected. Run the `reconcile` command below until the outcome is
-`succeeded`. A rotation can stop once more at `broker-retired`, because
-retirement restarts the broker again.
+`succeeded`. Rotation, recovery and a reconcile after an interruption can stop
+once more at `broker-retired`, because retiring the previous generation restarts
+the broker again.
 
 Plans expire after ten minutes here. Do not edit their fields or digests.
 `status` reads metadata and reports health as `unknown`; `probe` sends a new

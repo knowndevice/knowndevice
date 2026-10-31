@@ -81,7 +81,8 @@ development profile.
 - Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
   On Docker Engine for Linux, root containers could not use the seeded state:
   `init` and the lab checks stopped with "journal storage must be owned by the
-  current user". `scripts/lab_matrix.sh` sets it to the calling user.
+  current user". `scripts/lab_matrix.sh` sets it to the calling user, or to
+  root under rootless Docker, where container root is the calling user.
 - List the C compiler that the race tests need, and describe the
   `remote-outcome-unknown` stop after each broker restart in the quickstart.
 - Compile the race tests before running them in `make check`. On a cold build
