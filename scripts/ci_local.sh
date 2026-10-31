@@ -54,6 +54,9 @@ if [[ "$mode" == all || "$mode" == test ]]; then
   gate script-tests "$python" -m unittest discover -s tests/scripts -p 'test_*.py' -v
   gate go-format "$python" -c 'import pathlib, subprocess, sys; files = [str(p) for folder in ("cmd", "internal", "adapters", "api", "sdk", "examples") for p in pathlib.Path(folder).rglob("*.go")]; r = subprocess.run(["gofmt", "-l", *files], capture_output=True, text=True); print(r.stdout, end=""); print(r.stderr, end="", file=sys.stderr); sys.exit(r.returncode or bool(r.stdout))'
   gate go-vet go vet ./...
+  # Process adapter tests bound subprocess startup in wall-clock time; concurrent
+  # compilation on a cold cache can exceed those bounds, so compile first.
+  gate go-race-build go test -race -run '^$' ./...
   gate go-race go test -race -count=1 ./...
   gate sdk-external external_sdk
 fi

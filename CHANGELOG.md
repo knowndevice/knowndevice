@@ -84,6 +84,9 @@ development profile.
   current user". `scripts/lab_matrix.sh` sets it to the calling user.
 - List the C compiler that the race tests need, and describe the
   `remote-outcome-unknown` stop after each broker restart in the quickstart.
+- Compile the race tests before running them in `make check`. On a cold build
+  cache, concurrent compilation pushed process adapter subprocess startup past
+  its 5-second bound and failed the gate.
 - Add a release workflow and `scripts/release_build.py`. A version tag on
   `main` builds Linux amd64/arm64 archives, CycloneDX SBOMs and
   `SHA256SUMS` on both native runners, requires identical bytes, and
