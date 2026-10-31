@@ -8,8 +8,10 @@ This guide retains the v1alpha1 reference path. The
 [explicit credential profile guide](reference/credential-profiles.md) creates a
 separate fresh v1alpha2 lab; existing reference identities/stores are not converted.
 
-Install Go 1.27.3, Python 3.11+, Bash, Make and Docker with Compose running Linux
-containers. From the repository root:
+Install Go 1.27.3, Python 3.11+, Bash, Make, a C compiler and Docker with
+Compose running Linux containers. The race tests in `make check` need the C
+compiler: `build-essential` on Debian or Ubuntu, the Xcode Command Line Tools on
+macOS. From the repository root:
 
 ```sh
 make check
@@ -34,7 +36,13 @@ For a new generated lab, copy the built Linux artifacts before startup:
 mkdir -p .work/reference/artifacts
 cp bin/kd-reference-linux-* bin/knowndevice-linux-* .work/reference/artifacts/
 export KNOWNDEVICE_LAB_BIN_DIR="$PWD/.work/reference/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 ```
+
+`KNOWNDEVICE_LAB_USER` runs the containers as your user. The journal and key
+store refuse files owned by another user, and Docker Engine on Linux keeps the
+host ownership of the seeded files. Unset, the containers run as root, which
+works only where Docker maps ownership, as Docker Desktop does.
 
 Compose uses `bin/` by default. Rebuilding a bind-mounted file during a run can
 invalidate the running artifact; use a new directory and fresh seed for another
@@ -64,6 +72,12 @@ docker compose -f lab/compose.yaml run --rm device apply --plan /lab/device/plan
 docker compose -f lab/compose.yaml run --rm device status --config /lab/device.json
 docker compose -f lab/compose.yaml run --rm device probe --config /lab/device.json
 ```
+
+Registration restarts the broker, so `apply` usually stops at `registered`
+with `remote-outcome-unknown`: the verification probe runs before the responder
+has reconnected. Run the `reconcile` command below until the outcome is
+`succeeded`. A rotation can stop once more at `broker-retired`, because
+retirement restarts the broker again.
 
 Plans expire after ten minutes here. Do not edit their fields or digests.
 `status` reads metadata and reports health as `unknown`; `probe` sends a new

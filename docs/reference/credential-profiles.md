@@ -42,6 +42,7 @@ bin/kd-profilelab seed --dir .work/new-profile-lab --profile stable-device-cn --
 export KNOWNDEVICE_PROFILE_DIR="$PWD/.work/new-profile-lab"
 export KNOWNDEVICE_PROFILE_ARCH=arm64
 export KNOWNDEVICE_PROFILE_BIN_DIR="$PWD/.work/new-profile-lab/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab up -d
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab run --rm checks
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab down

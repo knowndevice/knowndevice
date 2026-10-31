@@ -21,6 +21,7 @@ bin/kd-profilelab seed \
 export KNOWNDEVICE_PROFILE_DIR="$PWD/.work/profile-example-arm64"
 export KNOWNDEVICE_PROFILE_ARCH=arm64
 export KNOWNDEVICE_PROFILE_BIN_DIR="$KNOWNDEVICE_PROFILE_DIR/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 export KNOWNDEVICE_PROFILE_RUNTIME=linux-arm64-on-arm64-docker-host
 cp bin/kd-adapter-linux-arm64 "$KNOWNDEVICE_PROFILE_BIN_DIR/"
 docker compose -p kd-profile-example-arm64 -f lab/profiles/compose.yaml up -d

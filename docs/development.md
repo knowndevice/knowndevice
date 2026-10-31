@@ -1,6 +1,7 @@
 # Development
 
-Use Go 1.27.3 and Python 3.11 or newer. Go dependencies are pinned in go.mod
+Use Go 1.27.3, Python 3.11 or newer and a C compiler for the race tests
+(`build-essential` on Debian or Ubuntu). Go dependencies are pinned in go.mod
 and verified by go.sum; scripts use the Python standard library. `make check` runs
 repository checks, maintenance-script tests, Go formatting, vet, race
 tests, and builds. Logs go to `.cache/checks`; binaries go to `bin`.

@@ -10,6 +10,9 @@ case "$arch" in amd64|arm64) ;; *) echo "Usage: bash scripts/lab_matrix.sh amd64
 export GOCACHE="${GOCACHE:-$root/.cache/go-build}"
 export GOMODCACHE="${GOMODCACHE:-$root/.cache/go-mod}"
 export GOTOOLCHAIN=local
+# Docker Engine on Linux keeps host file ownership, and the journal and key
+# store refuse files owned by another user, so containers run as the seeding user.
+export KNOWNDEVICE_LAB_USER="${KNOWNDEVICE_LAB_USER:-$(id -u):$(id -g)}"
 bin_dir="${KNOWNDEVICE_BIN_DIR:-bin}"
 run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 out="${KNOWNDEVICE_MATRIX_DIR:-$root/.work/lab-matrix-$arch-$run_id}"
@@ -30,6 +33,7 @@ fi
 {
   echo "commit: $commit"
   echo "runtime: $runtime"
+  echo "container user: $KNOWNDEVICE_LAB_USER"
   echo "started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } > "$out/summary.txt"
 

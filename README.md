@@ -25,20 +25,23 @@ stdio adapter path on a separate fresh, pinned process composition.
 
 ## Run the reference path
 
-Install Go 1.27.3, Python 3.11+, Bash, Make and Docker with Compose. No hosted
-account is required. The first build downloads pinned Go dependencies; the lab
+Install Go 1.27.3, Python 3.11+, Bash, Make, a C compiler for the race tests
+and Docker with Compose. No hosted account is required. The first build downloads pinned Go dependencies; the lab
 downloads digest-pinned images.
 
 ```sh
 make check
 bin/kd-reference seed --dir .work/reference
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 docker compose -f lab/compose.yaml up -d
 docker compose -f lab/compose.yaml run --rm checks
 docker compose -f lab/compose.yaml down
 ```
 
 The default lab architecture is `arm64`. On an amd64 Docker host set
-`KNOWNDEVICE_LAB_ARCH=amd64` before Compose. Seed requires a new directory and
+`KNOWNDEVICE_LAB_ARCH=amd64` before Compose. `KNOWNDEVICE_LAB_USER` runs the
+containers as your user, which Docker Engine on Linux needs to accept the
+seeded files. Seed requires a new directory and
 generates unique private demo material. Follow the
 [quickstart](docs/quickstart.md) for manual enrollment, rotation, interruption,
 recovery and retained evidence.

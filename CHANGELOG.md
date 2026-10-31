@@ -78,6 +78,12 @@ development profile.
   with built-in and generated-process adapters for one Linux architecture.
   CI runs it natively on amd64 and arm64.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
+  On Docker Engine for Linux, root containers could not use the seeded state:
+  `init` and the lab checks stopped with "journal storage must be owned by the
+  current user". `scripts/lab_matrix.sh` sets it to the calling user.
+- List the C compiler that the race tests need, and describe the
+  `remote-outcome-unknown` stop after each broker restart in the quickstart.
 - Add a release workflow and `scripts/release_build.py`. A version tag on
   `main` builds Linux amd64/arm64 archives, CycloneDX SBOMs and
   `SHA256SUMS` on both native runners, requires identical bytes, and

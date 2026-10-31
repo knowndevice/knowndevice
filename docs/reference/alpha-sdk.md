@@ -78,6 +78,7 @@ bin/kd-profilelab seed --dir .work/new-process-lab --profile stable-device-cn --
 export KNOWNDEVICE_PROFILE_DIR="$PWD/.work/new-process-lab"
 export KNOWNDEVICE_PROFILE_ARCH=arm64
 export KNOWNDEVICE_PROFILE_BIN_DIR="$PWD/.work/new-process-lab/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 export KNOWNDEVICE_PROFILE_RUNTIME="Linux arm64 on aarch64 Docker host"
 docker compose -f lab/profiles/compose.yaml -p new-process-lab up -d
 docker compose -f lab/profiles/compose.yaml -p new-process-lab run --rm checks
