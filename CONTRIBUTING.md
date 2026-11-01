@@ -22,7 +22,8 @@ make demo
 ```
 
 Use Go 1.27.3 and Python 3.11+. See [development](docs/development.md) for
-the directory map and tool configuration. `make check` and `make demo` need
+tool configuration and conventions for code and
+documentation. `make check` and `make demo` need
 no services. The reference and profile labs also need Docker with Compose;
 see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
 (or `amd64`) runs every lab cell for one architecture, as CI does.
@@ -34,7 +35,7 @@ behavior, relevant issue, tests actually run, and known limitations. Change
 documentation and examples with the code. A skipped test is a skipped test;
 do not describe it as passing. Do not add copied logs containing secrets.
 
-Use `fix:`, `feat:`, `docs:`, `test:`, `refactor:`, `build:`, or `chore:`
+Use `fix:`, `feat:`, `docs:`, `test:`, `refactor:`, `build:`, `ci:`, or `chore:`
 followed by a concrete subject. The maintainer may squash related commits.
 Stage explicit paths and preserve other contributors' uncommitted work.
 

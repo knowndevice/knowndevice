@@ -2,7 +2,9 @@
 
 Status: accepted for the foundation; review after the first pilot.
 
-Choose Go 1.27.2 for Linux amd64 and arm64. Deliver one domain engine,
+Choose Go 1.27.2 for Linux amd64 and arm64.
+Later change: the toolchain is pinned in `.go-version` and is now
+Go 1.27.3. Deliver one domain engine,
 controller, CLI, and Go SDK. Use established cryptography, JSON Schema
 2020-12, strict YAML configuration, and Cobra for the device CLI. The
 bootstrap fixture CLI uses standard-library flags so it can run offline;

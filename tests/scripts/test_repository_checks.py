@@ -40,9 +40,22 @@ class RepositoryCheckTests(unittest.TestCase):
             (root / ".claude/rules/continuity.md").write_text('---\npaths: [broken\n---\nRule.\n')
             self.assertTrue(any("continuity.md" in error for error in checks.check(root)))
 
-    def test_publication_fails_without_real_contacts(self):
-        errors = checks.check(ROOT, publication=True)
-        self.assertTrue(any("publication prerequisite missing" in error for error in errors))
+    def test_publication_requires_public_contacts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("SECURITY.md", "CODE_OF_CONDUCT.md"):
+                (root / name).write_text("Contact details follow at public launch.\n")
+            (root / "go.mod").write_text("module example.invalid/project\n\ngo 1.27.0\n")
+            self.assertEqual(len(checks.publication_errors(root)), 3)
+            (root / "go.mod").write_text("module github.com/example/project\n\ngo 1.27.0\n")
+            (root / "SECURITY.md").write_text("Report privately: https://github.com/example/project/security/advisories/new\n")
+            (root / "CODE_OF_CONDUCT.md").write_text("Be kind.\n\nReport concerns through https://example.invalid/contact.\n")
+            self.assertEqual(checks.publication_errors(root), ["publication prerequisite missing: .github/CODEOWNERS"])
+            (root / ".github").mkdir()
+            (root / ".github/CODEOWNERS").write_text("* @example\n")
+            self.assertEqual(checks.publication_errors(root), [])
+            (root / "SECURITY.md").write_text("Report privately: https://github.com/other/project/security/advisories/new\n")
+            self.assertIn("private vulnerability reporting link", checks.publication_errors(root)[0])
 
     def test_public_checkout_does_not_require_internal_setup(self):
         with tempfile.TemporaryDirectory() as directory:

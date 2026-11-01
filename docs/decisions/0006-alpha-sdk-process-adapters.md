@@ -12,6 +12,8 @@ stdio session after explicit version, schema, profile, capability, permission
 and limit agreement. A process is trusted selected code, not an OS sandbox.
 The local module remains `knowndevice.local/knowndevice`; local replace proves
 external importability without naming a canonical repository or publishing it.
+Later change: the module path is now `github.com/knowndevice/knowndevice`,
+and no version is published.
 
 ## Alternatives and ownership
 

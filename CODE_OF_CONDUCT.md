@@ -9,10 +9,8 @@ publication of private information, and repeated disruption are not
 acceptable. These rules apply to project issues, reviews, discussions,
 events, and communication made on the project's behalf.
 
-Once the repository is public, report concerns privately to the maintainer
-through the contact listed in the repository's community settings. That
-contact must be configured before public launch. During this local setup,
-use the existing private conversation with the maintainer.
+Report concerns privately to the maintainer through the
+[contact form](https://karauda.com/contact).
 
 The maintainer reviews reports, protects the reporter's privacy, and may
 remove content, request a correction, restrict participation, or remove

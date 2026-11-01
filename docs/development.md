@@ -66,7 +66,8 @@ does not establish that a command or source claim is correct.
 
 ## Working on a change
 
-Claim an issue and reference it in the pull request once GitHub is connected.
+Claim an issue and reference it in the pull request. Each issue names a roadmap
+ID (KD-0xx) that the roadmap and design records cite.
 For a larger change, explain the decisions, affected contracts, acceptance
 criteria, and observed checks. Durable decisions belong in ADRs and issues.
 Follow [CONTRIBUTING](../CONTRIBUTING.md) and the

@@ -41,7 +41,8 @@ docker compose -f lab/compose.yaml down
 The default lab architecture is `arm64`. On an amd64 Docker host set
 `KNOWNDEVICE_LAB_ARCH=amd64` before Compose. `KNOWNDEVICE_LAB_USER` runs the
 containers as your user, which Docker Engine on Linux needs to accept the
-seeded files; leave it unset with rootless Docker. Seed requires a new directory and
+seeded files; leave it unset with rootless Docker.
+Rootless Docker is not tested. Seed requires a new directory and
 generates unique private demo material. Follow the
 [quickstart](docs/quickstart.md) for manual enrollment, rotation, interruption,
 recovery and retained evidence.

@@ -29,6 +29,9 @@ docker compose -p kd-profile-example-arm64 -f lab/profiles/compose.yaml run --rm
 docker compose -p kd-profile-example-arm64 -f lab/profiles/compose.yaml down
 ```
 
+With rootless Docker, leave `KNOWNDEVICE_LAB_USER` unset. Rootless Docker is
+not tested.
+
 Use `--profile reference-generation-cn` with another new directory to exercise
 the reference identity policy through this composition. The legacy v1alpha1
 Mosquitto reference remains in [the original Compose file](../compose.yaml).

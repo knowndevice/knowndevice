@@ -43,10 +43,15 @@ export KNOWNDEVICE_PROFILE_DIR="$PWD/.work/new-profile-lab"
 export KNOWNDEVICE_PROFILE_ARCH=arm64
 export KNOWNDEVICE_PROFILE_BIN_DIR="$PWD/.work/new-profile-lab/artifacts"
 export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
+cp bin/kd-adapter-linux-arm64 "$KNOWNDEVICE_PROFILE_BIN_DIR/"
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab up -d
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab run --rm checks
 docker compose -f lab/profiles/compose.yaml -p new-profile-lab down
 ```
+
+The checks service mounts the adapter from the artifacts directory. Copy
+`bin/kd-adapter-linux-<arch>` there. With rootless Docker, leave
+`KNOWNDEVICE_LAB_USER` unset. Rootless Docker is not tested.
 
 Seed refuses an existing directory and creates a new random namespace/device,
 private demo keys and separate public role trust. Use `--profile

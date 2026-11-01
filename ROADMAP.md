@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 14 October 2026. Dates below are planning estimates, not release
+Updated 1 November 2026. Dates below are planning estimates, not release
 commitments. A milestone ships when its acceptance criteria pass.
 
 The estimate assumes work starts on 12 October, roughly two experienced
@@ -8,11 +8,13 @@ engineers' capacity, access to Linux amd64 and arm64 hardware, a pilot
 operator, and PKI/security review. More parallel coding cannot replace
 power-cycle tests, operator feedback, or a sustained pilot. With one
 maintainer, reserve 8–12 weeks for the first useful preview and reassess
-the later dates after that release.
+the later dates after that release. Linux hardware, a pilot operator and
+PKI/security review are not available yet, so the 0.2.0 and later dates depend
+on them.
 
 | Milestone | Estimate | Calendar window | Acceptance |
 | --- | --- | --- | --- |
-| Foundation | Present | 11 October 2026 | Research, rules, bootstrap model, local checks, prepared issue backlog |
+| Foundation | Done | 11 October 2026 | Research, rules, bootstrap model, local checks, issue backlog |
 | 0.1.0: useful reference lab | 4–6 weeks | 9–23 November 2026 | Real Linux rotation and recovery in the local PKI/MQTT stack; journal recovery; negative cases; release artifacts; Cloudflare website |
 | 0.2.0: pilot alpha | 12–16 weeks from start | 4 January–1 February 2027 | Distinct integration profile, alpha adapter tooling/conformance, scoped session withdrawal, offline and hardware evidence, read-only MCP |
 | 0.9.0: release candidate | 20–28 weeks from start | 1 March–26 April 2027 | Contract freeze proposed, migration rehearsal, two pilot reports, security findings addressed |
@@ -34,7 +36,8 @@ It will not claim all adapter, fleet, or hardware features from that design.
    registry. Deny revoked devices, missing recovery, and untrusted time.
 5. A no-account quickstart that runs in under 30 minutes on a clean machine.
 6. Tests for every checkpoint, lost issuance response, disk-full/read-only
-   storage, concurrent writers, wrong-generation probe, and rejected MQTT ACL.
+   storage, concurrent writers, wrong-generation probe, and rejected MQTT ACL,
+   all run in CI on native amd64 and arm64 runners.
 7. Linux amd64/arm64 binaries, checksums, signed provenance, SBOM, published
    alpha schemas, private vulnerability reporting, and release notes.
 8. A static Cloudflare website with the same status, tested quickstart,
@@ -47,10 +50,21 @@ loss remains a separate pilot-alpha gate.
 The first unreleased implementation now supplies the Linux reference path,
 SQLite/software slots, real PKI/MQTT adapters and a process-kill failure driver.
 See [quickstart](docs/quickstart.md) for the delivered profile. This does not
-complete 0.1: clean-machine contributor timing, public repository/security
-configuration, a hosted run of the release workflow (signed provenance and
-SBOM) and separately authorized publication remain release gates. `/sign` replaces the proposed `/rekey` for this profile
-because each generation needs a distinct subject; see
+complete 0.1. Remaining release gates:
+
+- Passing Quality runs (`make check`, `make demo` and the lab matrix) on
+  native amd64 and arm64 runners.
+- A timed quickstart by a contributor on a clean machine.
+- Filesystem-fault suites in CI.
+- Private vulnerability reporting verified.
+- Rulesets for `main` and version tags.
+- A hosted release run with signed provenance and SBOM.
+- Release notes.
+- The website.
+- Separately authorized publication.
+
+`/sign` replaces the proposed `/rekey` for this profile because each generation
+needs a distinct subject; see
 [RFC 0004](docs/decisions/0004-first-device-path.md).
 
 ## 0.2: prove that it extends beyond the reference lab
@@ -171,5 +185,8 @@ PKCS#11, FDO/BRSKI, OTA/trust-anchor rollover, ownership transfer, and
 additional clouds require demand and separate RFCs. They are not blockers
 for a useful Linux continuity framework.
 
-Tasks, dependencies, and acceptance criteria will be tracked in GitHub
-Issues when the public repository is connected.
+Tasks, dependencies and acceptance criteria are tracked in
+[GitHub Issues](https://github.com/knowndevice/knowndevice/issues) under the
+0.1.0, 0.2.0, 0.9.0 and 1.0.0
+[milestones](https://github.com/knowndevice/knowndevice/milestones). Each issue
+names the roadmap ID (KD-0xx) that this roadmap and the design records cite.

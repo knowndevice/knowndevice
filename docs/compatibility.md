@@ -16,7 +16,7 @@ migration, profile change, cloning or downgrade. See the
 | Configuration / plan / receipt | Explicit knowndevice/v1alpha1 or v1alpha2; JSON Schema 2020-12 | Explicit compatibility and migrations |
 | Journal | Explicit SQLite user_version 1 or fresh 2, WAL/FULL, lock, fence/revision | Tested migration and rollback eligibility |
 | Slots | Explicit version 1 or fresh 2, A/B, pointer, tombstones | Versioned lifecycle and upgrade rules |
-| Alpha Go SDK / built-in adapters | Public sdk/device and sdk/credentialprofile, same strict types/policy; local module path | Freeze after independent external use/conformance |
+| Alpha Go SDK / built-in adapters | Public sdk/device and sdk/credentialprofile, same strict types/policy; `github.com/knowndevice/knowndevice` without a published version | Freeze after independent external use/conformance |
 | Process adapters | knowndevice-process/0.1-alpha.1, exact embedded schema/error versions, pinned artifact and capabilities | Reviewed version negotiation guarantees |
 | Adapter tooling | Go generator and public sdk/conformance for the selected fixture/reference backend; explicit local SDK replace | Freeze only after independent external implementation and interoperability |
 | Hardware | Software keys only | Named model/firmware and measured protection |
