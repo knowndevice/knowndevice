@@ -14,7 +14,10 @@ spec.loader.exec_module(checks)
 class RepositoryCheckTests(unittest.TestCase):
     def copy_fixture(self, directory):
         root = Path(directory) / "fixture"
-        shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(*checks.EXCLUDED))
+        def ignore(directory, names):
+            return [name for name in names if name in checks.EXCLUDED or Path(directory, name, ".git").exists()]
+
+        shutil.copytree(ROOT, root, ignore=ignore)
         return root
 
     def test_detects_broken_link(self):
@@ -65,6 +68,24 @@ class RepositoryCheckTests(unittest.TestCase):
             self.assertEqual(checks.check(root), [])
             (root / "README.md").unlink()
             self.assertIn("missing README.md", checks.check(root))
+
+    def test_nested_checkouts_are_not_scanned(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("README.md", "LICENSE", "NOTICE", "CONTRIBUTING.md", "GOVERNANCE.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md", "ROADMAP.md", "AGENTS.md", "CLAUDE.md"):
+                (root / name).write_text("Public document.\n")
+            (root / "scripts").mkdir()
+            (root / "docs/ops").mkdir(parents=True)
+            (root / "docs/ops/catalogue.json").write_text("[]\n")
+            nested = root / ".claude/worktrees/agent-1"
+            (nested / "docs").mkdir(parents=True)
+            (nested / ".git").write_text("gitdir: /elsewhere/.git/worktrees/agent-1\n")
+            (nested / "docs/guide.md").write_text("[missing](absent.md)\n")
+            (nested / ".claude/rules").mkdir(parents=True)
+            (nested / ".claude/rules/broken.md").write_text("no frontmatter\n")
+            self.assertEqual(checks.check(root), [])
+            (root / "guide.md").write_text("[missing](absent.md)\n")
+            self.assertEqual(checks.check(root), ["guide.md: missing link target absent.md"])
 
     def test_partial_internal_setup_still_fails(self):
         with tempfile.TemporaryDirectory() as directory:
