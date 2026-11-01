@@ -40,7 +40,7 @@ func fixtureWithIssuer(t *testing.T, pin, profile string) (*device.PublicSnapsho
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := &device.PublicSnapshot{APIVersion: device.V2, EncodingVersion: 2, DeploymentID: "fixture-deployment", DeviceID: "gateway", Profile: policy, Composition: device.Composition{ID: "local-http-process-lab", Version: 1, AuthorityTemplateDigest: device.Hash([]byte("fixture-template")), AuthorityLifetimeSeconds: 1200, ProcessArtifactDigest: pin, ApplicationID: "fixture-worker", SessionPolicy: "new-connection-no-state-transfer", ObservationRoute: "authenticated-application-callback", WithdrawalScope: "whole-service-lab"}, Limits: device.DefaultLimits(), RequestTimeoutSeconds: 1, PlanTTLSeconds: 600, ClockTrust: "trusted-system-clock", RecoveryIdentity: device.RecoverySubject("gateway")}
+	s := &device.PublicSnapshot{APIVersion: device.V2, EncodingVersion: 2, DeploymentID: "fixture-deployment", DeviceID: "gateway", Profile: policy, Composition: device.Composition{ID: "local-http-process-lab", Version: 1, AuthorityTemplateDigest: device.Hash([]byte("fixture-template")), AuthorityLifetimeSeconds: 1200, ProcessArtifactDigest: pin, ApplicationID: "fixture-worker", SessionPolicy: "new-connection-no-state-transfer", ObservationRoute: "authenticated-application-callback", WithdrawalScope: "whole-service-lab"}, Limits: device.DefaultLimits(), RequestTimeoutSeconds: 5, PlanTTLSeconds: 600, ClockTrust: "trusted-system-clock", RecoveryIdentity: device.RecoverySubject("gateway")}
 	for _, role := range []string{"application", "authority", "clock", "entitlement", "platform", "transport", "withdrawal"} {
 		capability, _ := device.RequiredCapability(role)
 		s.Composition.Adapters = append(s.Composition.Adapters, device.AdapterSpec{Role: role, ID: "local-http-lab-" + role, Version: "1", ArtifactDigest: device.Hash([]byte("fixture-backend")), Capabilities: []string{capability}})
@@ -490,6 +490,8 @@ func (l *lockedLog) Write(p []byte) (int, error) {
 }
 func (l *lockedLog) text() string { l.mu.Lock(); defer l.mu.Unlock(); return l.Buffer.String() }
 
+func init() { initializeTimeout = 30 * time.Second }
+
 func TestHelperProcess(t *testing.T) {
 	mode := ""
 	recordPath := ""
@@ -710,7 +712,7 @@ func TestCancelLostLateAndUnsolicitedResponseRequireNewSession(t *testing.T) {
 			go func() { result <- c.Authorize(ctx, p, &recovery) }()
 			select {
 			case <-tracker.called:
-			case <-time.After(time.Second):
+			case <-time.After(5 * time.Second):
 				t.Fatal("process did not request bounded signing")
 			}
 			if mode == "late" {

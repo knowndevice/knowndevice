@@ -35,6 +35,10 @@ type pendingCall struct {
 	delivered bool
 }
 
+// initializeTimeout bounds adapter start-up and the initialize exchange. Package
+// tests raise it because their adapter is the race-enabled test binary.
+var initializeTimeout = 5 * time.Second
+
 // Client owns one initialized session. A lost/canceled call makes it terminal.
 // Reconciliation starts a fresh session and explicitly invokes the role's lookup.
 type Client struct {
@@ -169,7 +173,7 @@ func Start(ctx context.Context, opts Options) (*Client, error) {
 		return nil, device.ErrUnsupported
 	}
 	params := InitializeParams{[]string{ProtocolVersion}, []string{ErrorVersion}, []SchemaIdentity{Schema()}, opts.ArtifactDigest, snapshot.Digest(), snapshot.Composition.Digest(), snapshot.Profile, snapshot.Bytes(), required, permissions, DefaultLimits()}
-	initCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	initCtx, cancel := context.WithTimeout(ctx, initializeTimeout)
 	defer cancel()
 	var result InitializeResult
 	if err = c.control(initCtx, "plugin.initialize", params, "initializeResult", &result); err != nil {
