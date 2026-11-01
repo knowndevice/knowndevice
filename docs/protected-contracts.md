@@ -20,7 +20,9 @@ tests, schemas, examples and compatibility notes together:
 
 New trust mechanisms, storage migration and stable-contract changes require an
 RFC. [RFC 0004](decisions/0004-first-device-path.md) defines the first internal
-profile. The local module path must change before public SDK publication.
+profile. The module path is
+`github.com/knowndevice/knowndevice`; no module version is published yet,
+so the SDK is not published.
 
 [RFC 0005](decisions/0005-credential-profiles.md) defines the implemented opt-in internal
 profile/trust/composition contract. It preserves v1alpha1 behavior/digests and

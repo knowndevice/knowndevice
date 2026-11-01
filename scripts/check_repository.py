@@ -145,22 +145,33 @@ def check(root, publication=False):
             if not issue.get("acceptance") or any(dep not in ids for dep in issue.get("dependsOn", [])):
                 errors.append(f"incomplete roadmap issue {issue['id']}")
     if publication:
-        metadata_path = root / "planning/publication.json"
-        metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
-        for key in ("repository", "securityContact", "conductContact", "privateReportingVerified"):
-            if not metadata.get(key):
-                errors.append(f"publication prerequisite missing: {key}")
-        repository = metadata.get("repository")
-        if repository and f"module github.com/{repository}" not in (root / "go.mod").read_text():
-            errors.append("module path does not match the public repository")
-        if not (root / ".github/CODEOWNERS").exists():
-            errors.append("publication prerequisite missing: .github/CODEOWNERS")
+        errors += publication_errors(root)
+    return errors
+
+
+def publication_errors(root):
+    """Check the public files that outside readers rely on; remote settings need a live check."""
+    def text(name):
+        path = root / name
+        return path.read_text() if path.is_file() else ""
+
+    errors = []
+    module = re.search(r"^module github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)$", text("go.mod"), re.M)
+    if not module:
+        errors.append("publication prerequisite missing: module path github.com/OWNER/REPO in go.mod")
+    elif f"https://github.com/{module[1]}/security/advisories/new" not in text("SECURITY.md"):
+        errors.append("publication prerequisite missing: private vulnerability reporting link in SECURITY.md")
+    contact = re.compile(r"https://\S+|[\w.+-]+@[\w-]+\.[\w.-]+")
+    if not any("report" in part.lower() and contact.search(part) for part in text("CODE_OF_CONDUCT.md").split("\n\n")):
+        errors.append("publication prerequisite missing: private reporting contact in CODE_OF_CONDUCT.md")
+    if not (root / ".github/CODEOWNERS").is_file():
+        errors.append("publication prerequisite missing: .github/CODEOWNERS")
     return errors
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--publication", action="store_true", help="also require real repository and private contact configuration")
+    parser.add_argument("--publication", action="store_true", help="also require the public repository module path and private reporting contacts")
     args = parser.parse_args()
     errors = check(Path(__file__).resolve().parents[1], args.publication)
     if errors:

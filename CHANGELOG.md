@@ -20,6 +20,8 @@ development profile.
   generation-specific withdrawal and separate scoped recovery.
 - Added a digest-pinned generated-data lab, killed-process checkpoint tests,
   actual filesystem-fault profiles, unknown issuance import and alpha schemas.
+  The filesystem-fault profiles run only when `KD_FS_ROOT` and `KD_FS_FAULT`
+  select a prepared filesystem, not in the default gate or CI.
 
 ### Credential profiles
 
@@ -101,3 +103,10 @@ development profile.
   `SHA256SUMS` on both native runners, requires identical bytes, and
   attests provenance and SBOMs through GitHub OIDC. It does not publish a
   GitHub release. `knowndevice version` prints the release version.
+- Named a private contact in the code of conduct.
+- Updated docs to use the module path `github.com/knowndevice/knowndevice`.
+- Updated the profile and process lab instructions to copy the adapter artifact
+  and state the rootless Docker rule.
+- Changed `scripts/check_repository.py --publication` to check public files
+  (module path, private vulnerability reporting link, conduct contact,
+  CODEOWNERS) instead of local metadata.

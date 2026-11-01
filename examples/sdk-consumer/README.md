@@ -1,8 +1,9 @@
 # External alpha SDK consumer
 
-This standalone Go module imports only the public alpha SDK and adapters. Its
-local `replace ../..` proves workspace importability. The module path is local;
-this example establishes no publication, stable SDK or device hardware support.
+This standalone Go module imports only the public alpha SDK and adapters. It
+imports `github.com/knowndevice/knowndevice`; a local `replace ../..` supplies
+the unpublished module. This example establishes no publication, stable SDK
+or device hardware support.
 
 Run the in-memory proof from this directory:
 

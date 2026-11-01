@@ -2,8 +2,9 @@
 
 `sdk/conformance` runs the same 19 semantic cases for each reviewed credential
 profile through public SDK roles. An external Go module can import the runner
-and `sdk/conformance/fixture` using the current local module path and a local
-`replace`. This proves local importability, without SDK publication or an
+and `sdk/conformance/fixture` using
+`github.com/knowndevice/knowndevice` with a local `replace` until a version
+is published. This proves local importability, without SDK publication or an
 independent adapter author.
 
 ```go

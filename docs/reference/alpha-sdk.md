@@ -85,6 +85,9 @@ docker compose -f lab/profiles/compose.yaml -p new-process-lab run --rm checks
 docker compose -f lab/profiles/compose.yaml -p new-process-lab down
 ```
 
+With rootless Docker, leave `KNOWNDEVICE_LAB_USER` unset. Rootless Docker is
+not tested.
+
 Use `reference-generation-cn` for the other V2 profile on another fresh
 directory/project. `--authority-lifetime-seconds 300` binds that explicit shorter
 request while retaining the shared strict policy. Seed selects

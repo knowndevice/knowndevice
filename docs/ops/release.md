@@ -9,7 +9,8 @@ release. Follow the acceptance gates in [ROADMAP](../../ROADMAP.md).
 Match every README/website claim to available code and the tested scope.
 Update changelog, integration versions, hardware matrix, schemas, CLI
 reference, migration notes, supported versions and known limitations.
-Run `make check`, publication checks, real reference-stack CI, fuzzing,
+Run `make check`, `python3 scripts/check_repository.py --publication` (with a
+Python 3.11+ interpreter), real reference-stack CI, fuzzing,
 redaction, interruption and native/hardware tests appropriate to the release.
 An unrun required gate blocks the release; it does not block unrelated work.
 
@@ -25,8 +26,7 @@ storage and key changes independently before release.
 is on `main`. A manual run on any ref builds `0.0.0-dev` files without
 attestations. Neither creates a GitHub release; the files stay workflow
 artifacts, which expire with the repository's artifact retention (90 days by
-default) and need a signed-in account to download. No run has happened yet
-because the hosted repository is not connected.
+default) and need a signed-in account to download.
 
 GitHub runs `release.yml` from the tagged commit, so someone who can push a
 tag can also push a changed workflow that skips the `main` check and still
