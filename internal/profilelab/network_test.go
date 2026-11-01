@@ -324,7 +324,7 @@ func TestDelayedAuthorityHandshakePastDeadlineSendsNoSign(t *testing.T) {
 	ctx := timerlessDeadline{Context: context.Background(), at: time.Now().Add(100 * time.Millisecond)}
 	started := time.Now()
 	if _, e = control.sign(ctx, &r); e == nil || requests.Load() != 0 || signerCalls.Load() != 1 || time.Since(started) < 2200*time.Millisecond {
-		t.Fatal("authority effect followed a delayed handshake past deadline")
+		t.Fatalf("authority effect followed a delayed handshake past deadline: err=%v requests=%d signer calls=%d elapsed=%s plan remaining=%s", e, requests.Load(), signerCalls.Load(), time.Since(started), time.Until(p.ExpiresAt))
 	}
 	if e = control.revoke(ctx, &r, &r); e == nil || requests.Load() != 0 {
 		t.Fatal("authority revoke followed an expired deadline")

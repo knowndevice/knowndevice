@@ -548,6 +548,11 @@ func startConfiguredFixtureProcess(t *testing.T, mode string, rotation bool) (*C
 		t.Fatal(err)
 	}
 	log := &lockedLog{}
+	t.Cleanup(func() {
+		if t.Failed() {
+			t.Logf("adapter log:\n%s", log.text())
+		}
+	})
 	client, err := Start(context.Background(), Options{Executable: exe, ArtifactDigest: pin, Args: []string{"-test.run=^TestHelperProcess$", "process-fixture", mode}, WorkDir: root, Snapshot: s, Log: log})
 	if err != nil {
 		t.Fatal(err)
