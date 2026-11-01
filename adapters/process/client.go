@@ -9,11 +9,13 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -272,7 +274,9 @@ func (c *Client) finish(id string) {
 	}
 }
 
-func (c *Client) exchange(ctx context.Context, id string, p *pendingCall, params any, resultDef string, out any) error {
+func (c *Client) exchange(ctx context.Context, id string, p *pendingCall, params any, resultDef string, out any) (err error) {
+	started := time.Now()
+	defer func() { c.logRequest(ctx, p.method, started, err) }()
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -323,6 +327,43 @@ func (c *Client) exchange(ctx context.Context, id string, p *pendingCall, params
 	case <-c.done:
 		return device.ErrUnknown
 	}
+}
+
+// logRequest writes one line per request with the method, the elapsed and
+// available milliseconds and a coarse result; identifiers and payloads stay out.
+func (c *Client) logRequest(ctx context.Context, method string, started time.Time, err error) {
+	if c.log == nil {
+		return
+	}
+	budget := "none"
+	if deadline, ok := ctx.Deadline(); ok {
+		budget = strconv.FormatInt(deadline.Sub(started).Milliseconds(), 10)
+	}
+	_, _ = fmt.Fprintf(c.log, "adapter request method=%s elapsed_ms=%d budget_ms=%s result=%s\n", method, time.Since(started).Milliseconds(), budget, requestResult(err))
+}
+
+func requestResult(err error) string {
+	switch {
+	case err == nil:
+		return "ok"
+	case errors.Is(err, context.DeadlineExceeded):
+		return "deadline"
+	case errors.Is(err, context.Canceled):
+		return "canceled"
+	case errors.Is(err, device.ErrUnknown):
+		return "unknown"
+	case errors.Is(err, device.ErrDenied):
+		return "denied"
+	case errors.Is(err, device.ErrConflict):
+		return "conflict"
+	case errors.Is(err, device.ErrUnsupported):
+		return "unsupported"
+	case errors.Is(err, device.ErrPlanExpired):
+		return "plan-expired"
+	case errors.Is(err, device.ErrNotFound):
+		return "not-found"
+	}
+	return "error"
 }
 
 func (c *Client) cancel(id string, p *pendingCall) {

@@ -16,6 +16,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -620,7 +621,23 @@ func TestRealSubprocessSignerLookupAndRedaction(t *testing.T) {
 	if !strings.Contains(log.text(), "adapter stderr bytes=") {
 		t.Fatal("missing fixed stderr count")
 	}
+	timing := map[string]bool{}
+	for _, line := range strings.Split(log.text(), "\n") {
+		if !strings.HasPrefix(line, "adapter request ") {
+			continue
+		}
+		if !requestTimingLine.MatchString(line) {
+			t.Fatalf("request timing line has unexpected content: %q", line)
+		}
+		fields := strings.Fields(line)
+		timing[fields[2]+" "+fields[5]] = true
+	}
+	if !timing["method=entitlement.authorize result=ok"] || !timing["method=authority.lookup result=not-found"] {
+		t.Fatal("missing per-request timing lines")
+	}
 }
+
+var requestTimingLine = regexp.MustCompile(`^adapter request method=[a-z]+\.[A-Za-z]+ elapsed_ms=[0-9]+ budget_ms=(-?[0-9]+|none) result=[a-z-]+$`)
 
 func TestActualProcessRestartReconcilesOriginalDurableIntentWithoutReissue(t *testing.T) {
 	exe, err := os.Executable()

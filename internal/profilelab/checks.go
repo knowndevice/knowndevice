@@ -59,6 +59,7 @@ func (c *checks) cli(args ...string) ([]byte, int, error) {
 	defer cancel()
 	args = append(args, "--config", filepath.Join(c.dir, "device.json"))
 	cmd := exec.CommandContext(ctx, c.cliPath, args...)
+	cmd.Env = append(os.Environ(), "KNOWNDEVICE_PROCESS_TIMING=1")
 	var out, errout bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &errout
@@ -302,7 +303,7 @@ func (c *checks) rotateAt(phase string) error {
 		return e
 	}
 	cmd := exec.Command(c.cliPath, "apply", "--config", filepath.Join(c.dir, "device.json"), "--plan", filepath.Join(c.config.StateDir, "plan.json"))
-	cmd.Env = append(os.Environ(), "KNOWNDEVICE_REFERENCE_LAB=1", "KNOWNDEVICE_LAB_PAUSE_AT="+phase)
+	cmd.Env = append(os.Environ(), "KNOWNDEVICE_REFERENCE_LAB=1", "KNOWNDEVICE_LAB_PAUSE_AT="+phase, "KNOWNDEVICE_PROCESS_TIMING=1")
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
