@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func assertRecoveryScopeResult(t *testing.T, c *checks, err error, denied bool) {

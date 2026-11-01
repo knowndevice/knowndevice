@@ -5,7 +5,7 @@ package credentialprofile
 import (
 	"testing"
 
-	sdk "knowndevice.local/knowndevice/sdk/credentialprofile"
+	sdk "github.com/knowndevice/knowndevice/sdk/credentialprofile"
 )
 
 func TestPublicPolicyRetainsInternalTypeAndDigest(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"slices"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 const Version = "knowndevice-conformance/0.1-alpha.1"

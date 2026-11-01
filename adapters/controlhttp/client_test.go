@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/internal/testtls"
-	"knowndevice.local/knowndevice/adapters/mqttprobe"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/internal/testtls"
+	"github.com/knowndevice/knowndevice/adapters/mqttprobe"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 type probeFunc func(context.Context, device.Probe, device.Credential) (device.Probe, error)

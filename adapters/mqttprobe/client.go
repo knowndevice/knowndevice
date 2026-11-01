@@ -20,9 +20,9 @@ import (
 
 	"github.com/eclipse/paho.golang/packets"
 	"github.com/eclipse/paho.golang/paho"
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/internal/strictjson"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/internal/strictjson"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 const MaxPayload = 4096

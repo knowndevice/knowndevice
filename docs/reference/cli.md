@@ -113,7 +113,7 @@ Validate strict JSON/YAML configuration.
 
 ## `knowndevice version`
 
-Print the development version.
+Print the build version.
 
 ```text
 

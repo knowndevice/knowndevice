@@ -12,8 +12,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 type Observation struct {
@@ -109,7 +109,7 @@ func certificateAlert(err error) bool {
 	if errors.As(remote.Err, &alert) {
 		return alert == 42 || alert == 45 || alert == 46
 	}
-	// Go 1.27.2 TCP uses the private crypto/tls.alert uint8, while its exported
+	// Go 1.27 TCP uses the private crypto/tls.alert uint8, while its exported
 	// AlertError wrapper is used by QUIC. Unknown representations fail closed.
 	value := reflect.ValueOf(remote.Err)
 	if !value.IsValid() || value.Kind() != reflect.Uint8 || value.Type().PkgPath() != "crypto/tls" || value.Type().Name() != "alert" {

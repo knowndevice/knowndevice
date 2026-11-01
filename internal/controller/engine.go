@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 type Engine struct {

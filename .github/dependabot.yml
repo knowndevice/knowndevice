@@ -1,7 +1,16 @@
 version: 2
 updates:
   - package-ecosystem: gomod
-    directory: /
+    directories:
+      - /
+      - /examples/sdk-consumer
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: docker-compose
+    directories:
+      - /lab
+      - /lab/profiles
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

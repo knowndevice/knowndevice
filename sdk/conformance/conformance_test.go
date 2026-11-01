@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/conformance"
-	"knowndevice.local/knowndevice/sdk/conformance/fixture"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/conformance"
+	"github.com/knowndevice/knowndevice/sdk/conformance/fixture"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestBuiltinPublicSuite(t *testing.T) {

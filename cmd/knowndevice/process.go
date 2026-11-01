@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 type composedRemote interface {

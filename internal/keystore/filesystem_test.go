@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"testing"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func filesystemEnvironment(t *testing.T) (string, string) {

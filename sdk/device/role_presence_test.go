@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"knowndevice.local/knowndevice/adapters/profilehttp"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/profilehttp"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestLegacyRolesRefuseEveryTypedNilBeforeFacade(t *testing.T) {

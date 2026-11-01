@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/sdk/conformance"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/sdk/conformance"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 // This test adapter reads the actual authenticated fixture response. It accepts

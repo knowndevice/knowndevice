@@ -1,0 +1,107 @@
+name: Release
+
+# Builds and attests release files without publishing a GitHub release.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            host: amd64
+          - os: ubuntu-24.04-arm
+            host: arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+          cache: false
+      - name: Select the version
+        id: version
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF_TYPE" == tag ]]; then
+            if ! git merge-base --is-ancestor HEAD refs/remotes/origin/main; then
+              echo "::error::Tag $GITHUB_REF_NAME does not point at a commit on main"
+              exit 1
+            fi
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=0.0.0-dev" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run the local gate
+        run: make check
+      - name: Build archives, SBOMs and checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: python3 scripts/release_build.py --version "$VERSION" --out dist
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-built-on-${{ matrix.host }}
+          path: dist/
+          if-no-files-found: error
+
+  verify:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-built-on-*
+          path: built
+      - name: Require byte-identical files from both runners
+        run: |
+          diff -r built/release-built-on-amd64 built/release-built-on-arm64
+          cd built/release-built-on-amd64
+          sha256sum --check --strict SHA256SUMS
+
+  attest:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-built-on-amd64
+          path: dist
+      - name: Select the file prefix
+        id: files
+        run: echo "prefix=dist/knowndevice_${GITHUB_REF_NAME#v}_linux" >> "$GITHUB_OUTPUT"
+      - name: Attest build provenance for every release file
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS
+      - name: Attest the amd64 SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ steps.files.outputs.prefix }}_amd64.tar.gz
+          sbom-path: ${{ steps.files.outputs.prefix }}_amd64.cdx.json
+      - name: Attest the arm64 SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ steps.files.outputs.prefix }}_arm64.tar.gz
+          sbom-path: ${{ steps.files.outputs.prefix }}_arm64.cdx.json

@@ -103,7 +103,7 @@ func TestGenerationRejectsNamesModulesAndTraversalBeforeWriting(t *testing.T) {
 		func(o *Options) { o.Module = "example.com/a/v1" },
 		func(o *Options) { o.Module = "example.com/a/v02" },
 		func(o *Options) { o.Module = "gopkg.in/a" },
-		func(o *Options) { o.Module = "knowndevice.local/knowndevice" },
+		func(o *Options) { o.Module = "github.com/knowndevice/knowndevice" },
 		func(o *Options) { o.Root = "relative" },
 		func(o *Options) { o.Root += "/." },
 		func(o *Options) { o.SDKReplace += "/../knowndevice" },
@@ -127,7 +127,7 @@ func TestGenerationRejectsNamesModulesAndTraversalBeforeWriting(t *testing.T) {
 func TestSDKReplaceIsQuotedData(t *testing.T) {
 	options := testOptions(t)
 	selected := filepath.Join(options.Root, "sdk space \" $(ignored) `ignored`")
-	if os.Mkdir(selected, 0700) != nil || os.WriteFile(filepath.Join(selected, "go.mod"), []byte("module knowndevice.local/knowndevice\n"), 0600) != nil {
+	if os.Mkdir(selected, 0700) != nil || os.WriteFile(filepath.Join(selected, "go.mod"), []byte("module github.com/knowndevice/knowndevice\n"), 0600) != nil {
 		t.Fatal("test SDK module creation failed")
 	}
 	options.SDKReplace = selected

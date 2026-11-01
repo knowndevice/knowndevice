@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/internal/testtls"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/internal/testtls"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func fixture(t *testing.T, pin, profile string) (*device.PublicSnapshot, device.Plan, device.Credential, device.Credential) {

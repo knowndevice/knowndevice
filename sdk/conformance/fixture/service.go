@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/conformance"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/conformance"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func (b *backend) source(role string) string {

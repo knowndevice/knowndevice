@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 var _ device.Clock = (*process.Client)(nil)

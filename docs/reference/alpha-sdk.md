@@ -2,8 +2,8 @@
 
 `sdk/device` and `sdk/credentialprofile` expose the same strict types and
 validators used by the controller and built-in adapters. They are unreleased
-alpha packages. The module remains `knowndevice.local/knowndevice`; no canonical
-hosted repository, published module or stable SDK guarantee is configured.
+alpha packages. The module path is `github.com/knowndevice/knowndevice`; no
+module version is published and no stable SDK guarantee exists.
 [RFC 0006](../decisions/0006-alpha-sdk-process-adapters.md) defines process
 execution; [RFC 0005](../decisions/0005-credential-profiles.md) governs identity,
 trust, time, activation and withdrawal.
@@ -78,6 +78,7 @@ bin/kd-profilelab seed --dir .work/new-process-lab --profile stable-device-cn --
 export KNOWNDEVICE_PROFILE_DIR="$PWD/.work/new-process-lab"
 export KNOWNDEVICE_PROFILE_ARCH=arm64
 export KNOWNDEVICE_PROFILE_BIN_DIR="$PWD/.work/new-process-lab/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 export KNOWNDEVICE_PROFILE_RUNTIME="Linux arm64 on aarch64 Docker host"
 docker compose -f lab/profiles/compose.yaml -p new-process-lab up -d
 docker compose -f lab/profiles/compose.yaml -p new-process-lab run --rm checks

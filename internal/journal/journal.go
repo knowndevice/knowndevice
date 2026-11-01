@@ -18,7 +18,7 @@ import (
 	"sync"
 	"syscall"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 	_ "modernc.org/sqlite"
 )
 

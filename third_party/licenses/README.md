@@ -2,7 +2,7 @@
 
 This directory contains unchanged license and notice files for the 15 Go
 module versions explicitly pinned in [go.mod](../../go.mod), plus the Go
-`go1.27.2` standard library and runtime license. Include this directory and
+`go1.27.3` standard library and runtime license. Include this directory and
 the project [NOTICE](../../NOTICE) when distributing Known Device binaries.
 
 The module files come from the corresponding pinned Go module archives.
@@ -28,7 +28,7 @@ copyright statements, spacing and terms.
 | `modernc.org/libc` | `v1.77.1` | BSD-3-Clause and bundled third-party notices | [LICENSE](modernc.org/libc@v1.77.1/LICENSE), [third-party notices](modernc.org/libc@v1.77.1/LICENSE-3RD-PARTY.md) |
 | `modernc.org/mathutil` | `v1.7.1` | BSD-3-Clause | [LICENSE](modernc.org/mathutil@v1.7.1/LICENSE), [mersenne/LICENSE](modernc.org/mathutil@v1.7.1/mersenne/LICENSE) |
 | `modernc.org/memory` | `v1.12.1` | BSD-3-Clause with supplementary notices | [LICENSE](modernc.org/memory@v1.12.1/LICENSE), [Go](modernc.org/memory@v1.12.1/LICENSE-GO), [mmap-go](modernc.org/memory@v1.12.1/LICENSE-MMAP-GO), [logo reference](modernc.org/memory@v1.12.1/LICENSE-LOGO) |
-| Go standard library and runtime | `go1.27.2` | BSD-3-Clause | [LICENSE](go@go1.27.2/LICENSE) |
+| Go standard library and runtime | `go1.27.3` | BSD-3-Clause | [LICENSE](go@go1.27.3/LICENSE) |
 
 Paho supplies two licensing alternatives. Both upstream license texts are
 preserved. The YAML module applies MIT to its libyaml-derived files and

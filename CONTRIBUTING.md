@@ -21,10 +21,11 @@ make check
 make demo
 ```
 
-Use Go 1.27.2 and Python 3.11+. See [development](docs/development.md) for
-the directory map and tool configuration. The bootstrap has no external
-runtime dependencies. The public module path will be assigned when the
-repository owner is known.
+Use Go 1.27.3 and Python 3.11+. See [development](docs/development.md) for
+the directory map and tool configuration. `make check` and `make demo` need
+no services. The reference and profile labs also need Docker with Compose;
+see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
+(or `amd64`) runs every lab cell for one architecture, as CI does.
 
 ## Pull requests
 

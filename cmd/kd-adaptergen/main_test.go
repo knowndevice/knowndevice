@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"knowndevice.local/knowndevice/sdk/adaptergen"
+	"github.com/knowndevice/knowndevice/sdk/adaptergen"
 )
 
 func TestUsageAndInvalidArguments(t *testing.T) {

@@ -2,11 +2,11 @@ module sdk-consumer.local/example
 
 go 1.27.0
 
-require knowndevice.local/knowndevice v0.0.0
+require github.com/knowndevice/knowndevice v0.0.0
 
 require (
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 )
 
-replace knowndevice.local/knowndevice => ../..
+replace github.com/knowndevice/knowndevice => ../..

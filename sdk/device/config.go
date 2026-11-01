@@ -16,9 +16,9 @@ import (
 	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
+	"github.com/knowndevice/knowndevice/api/schemas"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 	"go.yaml.in/yaml/v3"
-	"knowndevice.local/knowndevice/api/schemas"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
 )
 
 const MaxInput = 1 << 20

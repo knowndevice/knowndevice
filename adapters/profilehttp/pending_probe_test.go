@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/internal/testtls"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/internal/testtls"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestAUD02PendingPlanCannotAuthorizePreviousActiveProbe(t *testing.T) {

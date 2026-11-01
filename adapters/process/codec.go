@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"knowndevice.local/knowndevice/api/schemas"
+	"github.com/knowndevice/knowndevice/api/schemas"
 )
 
 var ErrProtocol = errors.New("adapter process protocol refused")

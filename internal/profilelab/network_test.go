@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func testLocalRoleCertificate(t *testing.T) (*x509.Certificate, *x509.Certificate, tls.Certificate) {

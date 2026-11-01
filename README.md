@@ -25,20 +25,23 @@ stdio adapter path on a separate fresh, pinned process composition.
 
 ## Run the reference path
 
-Install Go 1.27.2, Python 3.11+, Bash, Make and Docker with Compose. No hosted
-account is required. The first build downloads pinned Go dependencies; the lab
+Install Go 1.27.3, Python 3.11+, Bash, Make, a C compiler for the race tests
+and Docker with Compose. No hosted account is required. The first build downloads pinned Go dependencies; the lab
 downloads digest-pinned images.
 
 ```sh
 make check
 bin/kd-reference seed --dir .work/reference
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 docker compose -f lab/compose.yaml up -d
 docker compose -f lab/compose.yaml run --rm checks
 docker compose -f lab/compose.yaml down
 ```
 
 The default lab architecture is `arm64`. On an amd64 Docker host set
-`KNOWNDEVICE_LAB_ARCH=amd64` before Compose. Seed requires a new directory and
+`KNOWNDEVICE_LAB_ARCH=amd64` before Compose. `KNOWNDEVICE_LAB_USER` runs the
+containers as your user, which Docker Engine on Linux needs to accept the
+seeded files; leave it unset with rootless Docker. Seed requires a new directory and
 generates unique private demo material. Follow the
 [quickstart](docs/quickstart.md) for manual enrollment, rotation, interruption,
 recovery and retained evidence.
@@ -107,6 +110,7 @@ cuts on named hardware.
 Read [CONTRIBUTING](CONTRIBUTING.md), [GOVERNANCE](GOVERNANCE.md),
 [SECURITY](SECURITY.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 Known Device uses [Apache-2.0](LICENSE); dependency notices are in [NOTICE](NOTICE).
-The module path remains local until a public repository is configured.
+The module path is `github.com/knowndevice/knowndevice`; no module version is
+published yet.
 The Cloudflare site awaits the first useful release gates and a separate
 publication scope.

@@ -18,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/internal/testtls"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/internal/testtls"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func clientFixture(t *testing.T) (*Client, device.Plan, device.Credential, *testtls.Profile) {

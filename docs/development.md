@@ -1,6 +1,7 @@
 # Development
 
-Use Go 1.27.2 and Python 3.11 or newer. Go dependencies are pinned in go.mod
+Use Go 1.27.3, Python 3.11 or newer and a C compiler for the race tests
+(`build-essential` on Debian or Ubuntu). Go dependencies are pinned in go.mod
 and verified by go.sum; scripts use the Python standard library. `make check` runs
 repository checks, maintenance-script tests, Go formatting, vet, race
 tests, and builds. Logs go to `.cache/checks`; binaries go to `bin`.
@@ -46,9 +47,9 @@ Filesystem-fault tests in journal/keystore require `KD_FS_ROOT`
 and `KD_FS_FAULT` on a Linux ENOSPC or read-only mount; ordinary
 native tests explicitly skip that profile. Do not report those skips as passes.
 
-The bootstrap module `knowndevice.local/knowndevice` is deliberately local.
-When the public repository is supplied, replace it and its imports with
-the canonical `github.com/OWNER/REPO` path before releasing an SDK.
+The module path is `github.com/knowndevice/knowndevice`. No module version
+is published yet; a consumer outside this checkout uses a local `replace`,
+as `examples/sdk-consumer` does.
 
 ## Documentation conventions
 

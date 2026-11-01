@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func TestAUD02PendingPlanCannotAuthorizePreviousActiveProbe(t *testing.T) {

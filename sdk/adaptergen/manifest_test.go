@@ -16,9 +16,9 @@ import (
 	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func manifestSnapshot(t *testing.T, profileID string) *device.PublicSnapshot {

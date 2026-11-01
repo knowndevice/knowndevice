@@ -3,7 +3,7 @@ services:
   step-ca:
     platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
     image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
-    user: "0:0"
+    user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["step-ca"]
     command: ["/lab/ca/ca.json"]
     volumes:
@@ -17,7 +17,7 @@ services:
   profile-control:
     platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
     image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
-    user: "0:0"
+    user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/usr/local/bin/kd-profilelab"]
     command: ["control", "--dir", "/lab"]
     healthcheck:
@@ -47,7 +47,7 @@ services:
   profile-application:
     platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
     image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
-    user: "0:0"
+    user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/usr/local/bin/kd-profilelab"]
     command: ["application", "--dir", "/lab"]
     healthcheck:
@@ -72,7 +72,7 @@ services:
     platform: linux/${KNOWNDEVICE_PROFILE_ARCH:-arm64}
     image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
     profiles: ["tools"]
-    user: "0:0"
+    user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/usr/local/bin/kd-profilelab"]
     command: ["check", "--dir", "/lab"]
     environment:

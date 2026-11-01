@@ -6,7 +6,7 @@ package credentialprofile
 import (
 	"crypto/x509"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 )
 
 const (

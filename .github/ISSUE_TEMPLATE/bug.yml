@@ -2,6 +2,12 @@ name: Bug report
 description: Report a reproducible defect without credentials or identifying fleet logs.
 title: "bug: "
 body:
+  - type: markdown
+    attributes:
+      value: >-
+        Report a vulnerability privately through
+        [Security → Report a vulnerability](https://github.com/knowndevice/knowndevice/security/advisories/new),
+        not in a public issue.
   - type: textarea
     id: environment
     attributes:

@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/process"
-	"knowndevice.local/knowndevice/internal/controller"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/journal"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/adapters/process"
+	"github.com/knowndevice/knowndevice/internal/controller"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/journal"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 )
 
 func activeProbePlan(s device.State) (device.Plan, error) {

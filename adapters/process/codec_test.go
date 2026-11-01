@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/credentialprofile"
+	"github.com/knowndevice/knowndevice/sdk/credentialprofile"
 )
 
 const testID = "h-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

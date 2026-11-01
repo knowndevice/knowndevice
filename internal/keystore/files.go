@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"knowndevice.local/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/device"
 )
 
 func decodeJSON(data []byte, value any) error {

@@ -24,11 +24,11 @@ import (
 	"syscall"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/controller"
-	"knowndevice.local/knowndevice/internal/credentialprofile"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/journal"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/internal/controller"
+	"github.com/knowndevice/knowndevice/internal/credentialprofile"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/journal"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 )
 
 type checkReport struct {
@@ -549,7 +549,7 @@ func recoveryRoleAlert(err error) bool {
 	if errors.As(remote.Err, &alert) {
 		return alert == 48 // unknown_ca, after the exact recovery leaf was offered.
 	}
-	// Go 1.27.2 TCP uses crypto/tls.alert; AlertError is used by QUIC.
+	// Go 1.27 TCP uses crypto/tls.alert; AlertError is used by QUIC.
 	// Unrecognized representations and textual errors remain unknown.
 	value := reflect.ValueOf(remote.Err)
 	return value.IsValid() && value.Kind() == reflect.Uint8 && value.Type().PkgPath() == "crypto/tls" && value.Type().Name() == "alert" && value.Uint() == 48

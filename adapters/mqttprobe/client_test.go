@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.golang/packets"
-	"knowndevice.local/knowndevice/adapters/internal/testtls"
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/adapters/internal/testtls"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func packet(t *testing.T, connection net.Conn, kind byte, content packets.Packet) bool {

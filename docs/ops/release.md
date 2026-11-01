@@ -20,12 +20,72 @@ storage and key changes independently before release.
 
 ## Artifacts and provenance
 
-Build reproducibly with a pinned toolchain and recorded source commit.
-Publish Linux amd64/arm64 archives, checksums, SBOM and provenance bound
-to their digests. Use a release workflow with least privilege and OIDC
-for signing/attestation. Verify downloaded artifacts through an independent
-consumer path and document that verification. No release workflow is
-implemented in the foundation.
+[`release.yml`](../../.github/workflows/release.yml) runs when a tag
+`vX.Y.Z` or `vX.Y.Z-prerelease` is pushed and stops unless the tagged commit
+is on `main`. A manual run on any ref builds `0.0.0-dev` files without
+attestations. Neither creates a GitHub release; the files stay workflow
+artifacts, which expire with the repository's artifact retention (90 days by
+default) and need a signed-in account to download. No run has happened yet
+because the hosted repository is not connected.
+
+GitHub runs `release.yml` from the tagged commit, so someone who can push a
+tag can also push a changed workflow that skips the `main` check and still
+gets attestations from the same workflow path. The signature shows which
+workflow and ref ran, not that the commit is on `main`. The control is a tag
+ruleset that lets only maintainers create, move or delete `v*` tags.
+
+1. Build jobs on native amd64 and arm64 runners, with read-only repository
+   access, run `make check` and `scripts/release_build.py`.
+2. The script refuses a dirty tree, a Go toolchain other than `.go-version`,
+   and a release version without the matching tag on HEAD. It builds the
+   five commands for linux/amd64 and linux/arm64 with `CGO_ENABLED=0`,
+   `-trimpath` and `-X main.version`, and checks each binary's build info for
+   the commit, a clean tree, the target, the toolchain and, for a release,
+   the tagged module version. On Linux it also runs the native
+   `knowndevice version`. Output appears only after every step passes.
+3. A verify job requires byte-identical files from both runners.
+4. For pushed tags only, the attest job, the only job with `id-token: write` and
+   `attestations: write`, signs a SLSA build provenance attestation for every
+   file in `SHA256SUMS` and an SBOM attestation for each archive.
+
+| File | Content |
+| --- | --- |
+| `knowndevice_<version>_linux_<arch>.tar.gz` | `bin/` with the five commands, LICENSE, NOTICE, README, CHANGELOG, `schemas/` and `third_party/licenses/`; commit time as mtime, root owner, fixed modes and order |
+| `knowndevice_<version>_linux_<arch>.cdx.json` | CycloneDX 1.6 SBOM from the binaries' own build info: binaries with SHA-256, Go modules with purl and `go.sum` hash, the standard library |
+| `SHA256SUMS` | SHA-256 of the four files above |
+
+Artifact attestations work in public repositories, and in private ones only
+on GitHub Enterprise Cloud ([actions/attest](https://github.com/actions/attest#readme)).
+A public repository signs through the public-good Sigstore instance, so each
+tag run writes a permanent public transparency-log entry. Treat pushing a
+release tag as publication.
+
+Build the same files locally from a clean checkout with the pinned toolchain.
+Identical bytes also need the same tags, an empty or matching `GOMODCACHE`,
+and a Python whose zlib produces the same deflate output; zlib-ng does not:
+
+```sh
+python3 scripts/release_build.py --version 0.0.0-dev --out dist
+```
+
+Go caches the pseudo-version of a commit in `GOMODCACHE` and keeps using it
+after the commit is tagged. If the tagged commit was built before, a local
+release build is refused; point `GOMODCACHE` at an empty directory. When one
+commit carries several version tags, Go records the highest, so only that
+version builds.
+
+Once the files are published after a tag run, a consumer verifies a
+downloaded archive with checksums and the
+[GitHub CLI](https://cli.github.com/manual/gh_attestation_verify):
+
+```sh
+sha256sum --check --strict --ignore-missing SHA256SUMS
+gh attestation verify knowndevice_0.1.0_linux_amd64.tar.gz --repo knowndevice/knowndevice \
+  --signer-workflow knowndevice/knowndevice/.github/workflows/release.yml \
+  --source-ref refs/tags/v0.1.0
+gh attestation verify knowndevice_0.1.0_linux_amd64.tar.gz --repo knowndevice/knowndevice \
+  --predicate-type https://cyclonedx.org/bom
+```
 
 ## Publish within the approved scope
 

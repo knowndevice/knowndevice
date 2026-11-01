@@ -27,12 +27,12 @@ read-only version inspection cannot safely reconstruct it. Keep journal,
 sidecars, slots, pointer and tombstones together. No backup/restore tool or
 clone resistance is delivered.
 
-Go 1.27.2 builds Linux amd64/arm64. Runtime evidence must state architecture and
+Go 1.27.3 builds Linux amd64/arm64. Runtime evidence must state architecture and
 emulation; cross-compilation is not hardware evidence. Negative expired-client
 TLS observation depends on the tested alert shape; unknown shapes fail closed.
 
-The module remains `knowndevice.local/knowndevice` until a public repository is
-configured. Stable contracts, interrupted upgrades, alpha migrations and
+The module path is `github.com/knowndevice/knowndevice`; no module version is
+published yet. Stable contracts, interrupted upgrades, alpha migrations and
 external conformance remain release work. Rollback must never revive retired,
 revoked, expired or compromised credentials.
 

@@ -28,11 +28,12 @@ import (
 	"syscall"
 	"time"
 
-	"knowndevice.local/knowndevice/adapters/controlhttp"
-	"knowndevice.local/knowndevice/adapters/credentials"
-	"knowndevice.local/knowndevice/adapters/stepca"
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/adapters/controlhttp"
+	"github.com/knowndevice/knowndevice/adapters/credentials"
+	"github.com/knowndevice/knowndevice/adapters/mqttprobe"
+	"github.com/knowndevice/knowndevice/adapters/stepca"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 	_ "modernc.org/sqlite"
 )
 
@@ -50,6 +51,26 @@ type reservation struct {
 	Revoked     bool               `json:"revoked"`
 }
 
+// Only the control service may publish the readiness request; the topic sits
+// under the responder's kd/+/+/request subscription so an echo proves it.
+const (
+	readyRequestTopic  = "kd/control/ready/request"
+	readyResponseTopic = "kd/control/ready/response"
+)
+
+type readiness struct {
+	Nonce string `json:"nonce"`
+}
+
+type brokerLink interface {
+	Subscribe(context.Context, string) error
+	Publish(context.Context, string, []byte) error
+	Messages() <-chan mqttprobe.Message
+	Errors() <-chan error
+	Done() <-chan struct{}
+	Close(context.Context) error
+}
+
 type control struct {
 	mu     sync.Mutex
 	dir    string
@@ -59,6 +80,12 @@ type control struct {
 	roots  *x509.CertPool
 	config device.Config
 	broker *exec.Cmd
+	// exited closes when the running broker process ends; applied is the ACL
+	// it was started with.
+	exited  chan struct{}
+	applied string
+	restart func(context.Context) error
+	dial    func(context.Context) (brokerLink, error)
 }
 
 func rootsAt(dir string) (*x509.CertPool, error) {
@@ -171,6 +198,8 @@ func openControl(dir string) (*control, error) {
 	if err != nil {
 		return nil, err
 	}
+	s.restart = s.restartBroker
+	s.dial = s.dialBroker
 	return s, nil
 }
 
@@ -237,26 +266,26 @@ func (s *control) token(ctx context.Context, req stepca.TokenRequest) (string, e
 	return encoded + "." + b64(signature), nil
 }
 
-func (s *control) writeACL(ctx context.Context) error {
+func (s *control) writeACL(ctx context.Context) (string, error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT body FROM operations ORDER BY target")
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer rows.Close()
 	var records []reservation
 	for rows.Next() {
 		var b []byte
 		if err := rows.Scan(&b); err != nil {
-			return err
+			return "", err
 		}
 		var r reservation
 		if err := json.Unmarshal(b, &r); err != nil {
-			return err
+			return "", err
 		}
 		records = append(records, r)
 	}
 	if err := rows.Err(); err != nil {
-		return err
+		return "", err
 	}
 	rows.Close()
 	retired := map[uint64]bool{}
@@ -267,9 +296,10 @@ func (s *control) writeACL(ctx context.Context) error {
 	}
 	var out strings.Builder
 	out.WriteString("user responder\ntopic read kd/+/+/request\ntopic write kd/+/+/response\n")
+	fmt.Fprintf(&out, "user broker-control\ntopic write %s\ntopic read %s\n", readyRequestTopic, readyResponseTopic)
 	var p policy
 	if err := readJSON(filepath.Join(s.dir, "fixtures", "policy.json"), &p); err != nil {
-		return err
+		return "", err
 	}
 	for _, r := range records {
 		if !r.Registered && !r.Registering {
@@ -283,23 +313,48 @@ func (s *control) writeACL(ctx context.Context) error {
 			fmt.Fprintf(&out, "topic write kd/%s/g%d/request\ntopic read kd/%s/g%d/response\n", r.Plan.DeviceID, r.Plan.TargetGeneration, r.Plan.DeviceID, r.Plan.TargetGeneration)
 		}
 	}
-	return atomic(filepath.Join(s.dir, "broker", "acl"), []byte(out.String()))
+	return out.String(), atomic(filepath.Join(s.dir, "broker", "acl"), []byte(out.String()))
+}
+
+func (s *control) brokerRunning() bool {
+	if s.exited == nil {
+		return false
+	}
+	select {
+	case <-s.exited:
+		return false
+	default:
+		return true
+	}
+}
+
+func (s *control) stopBroker() error {
+	if s.brokerRunning() {
+		if err := s.broker.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+			return err
+		}
+		<-s.exited
+	}
+	s.broker, s.exited = nil, nil
+	return nil
 }
 
 func (s *control) restartBroker(ctx context.Context) error {
-	if s.broker != nil && s.broker.Process != nil {
-		if err := s.broker.Process.Kill(); err != nil {
-			return err
-		}
-		_ = s.broker.Wait()
-		s.broker = nil
-	}
-	s.broker = exec.Command("/usr/sbin/mosquitto", "-c", filepath.Join(s.dir, "broker", "mosquitto.conf"))
-	s.broker.Stdout = os.Stdout
-	s.broker.Stderr = os.Stderr
-	if err := s.broker.Start(); err != nil {
+	if err := s.stopBroker(); err != nil {
 		return err
 	}
+	broker := exec.Command("/usr/sbin/mosquitto", "-c", filepath.Join(s.dir, "broker", "mosquitto.conf"))
+	broker.Stdout = os.Stdout
+	broker.Stderr = os.Stderr
+	if err := broker.Start(); err != nil {
+		return err
+	}
+	exited := make(chan struct{})
+	go func() {
+		_ = broker.Wait()
+		close(exited)
+	}()
+	s.broker, s.exited = broker, exited
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
 		conn, err := net.DialTimeout("tcp", "127.0.0.1:8883", 100*time.Millisecond)
@@ -314,6 +369,100 @@ func (s *control) restartBroker(ctx context.Context) error {
 		}
 	}
 	return device.ErrUnknown
+}
+
+// reloadBroker makes the running broker enforce acl and returns once the
+// responder answers through it. A retry after an unknown answer finds the
+// policy already applied and only waits, so a slow responder still catches up.
+// The bound is shorter than the controller's request timeout; when it expires
+// the outcome is unknown.
+func (s *control) reloadBroker(ctx context.Context, acl string) error {
+	ctx, cancel := context.WithTimeout(ctx, s.config.Timeout()*4/5)
+	defer cancel()
+	if acl != s.applied || !s.brokerRunning() {
+		s.applied = ""
+		if err := s.restart(ctx); err != nil {
+			return err
+		}
+		s.applied = acl
+	}
+	return s.awaitResponder(ctx)
+}
+
+func (s *control) awaitResponder(ctx context.Context) error {
+	nonce, err := device.RandomID()
+	if err != nil {
+		return err
+	}
+	ping, err := json.Marshal(readiness{Nonce: nonce})
+	if err != nil {
+		return err
+	}
+	for {
+		err := s.pingResponder(ctx, ping)
+		if err == nil {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			fmt.Fprintf(os.Stderr, "responder readiness not confirmed: %v\n", err)
+			return device.ErrUnknown
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+}
+
+// pingResponder republishes the request on one connection until the exact
+// echo arrives, the connection ends or ctx expires.
+func (s *control) pingResponder(ctx context.Context, ping []byte) error {
+	link, err := s.dial(ctx)
+	if err != nil {
+		return err
+	}
+	defer link.Close(ctx)
+	if err := link.Subscribe(ctx, readyResponseTopic); err != nil {
+		return err
+	}
+	resend := time.NewTicker(200 * time.Millisecond)
+	defer resend.Stop()
+	publish := true
+	for {
+		if publish {
+			if err := link.Publish(ctx, readyRequestTopic, ping); err != nil {
+				return err
+			}
+			publish = false
+		}
+		select {
+		case <-ctx.Done():
+			return device.ErrUnknown
+		case <-link.Done():
+			return device.ErrUnknown
+		case err := <-link.Errors():
+			return err
+		case <-resend.C:
+			publish = true
+		case message, ok := <-link.Messages():
+			if !ok {
+				return device.ErrUnknown
+			}
+			if !message.Retained && message.Topic == readyResponseTopic && bytes.Equal(message.Payload, ping) {
+				return nil
+			}
+		}
+	}
+}
+
+func (s *control) dialBroker(ctx context.Context) (brokerLink, error) {
+	cert, err := keystore.LoadServiceCredential(filepath.Join(s.dir, "control", "cert.pem"), filepath.Join(s.dir, "control", "key.pem"), x509.ExtKeyUsageClientAuth)
+	if err != nil {
+		return nil, err
+	}
+	link, err := mqttprobe.OpenTLS(ctx, mqttprobe.Options{Endpoint: s.config.MQTTEndpoint, Roots: s.roots, Timeout: time.Second}, cert)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (s *control) request(w http.ResponseWriter, req *http.Request) {
@@ -529,10 +678,11 @@ func (s *control) handle(req *http.Request, in controlhttp.Request, out *control
 				return err
 			}
 		}
-		if err := s.writeACL(ctx); err != nil {
+		acl, err := s.writeACL(ctx)
+		if err != nil {
 			return err
 		}
-		if err := s.restartBroker(ctx); err != nil {
+		if err := s.reloadBroker(ctx, acl); err != nil {
 			return err
 		}
 		r.Registered = true
@@ -585,29 +735,34 @@ func (s *control) handle(req *http.Request, in controlhttp.Request, out *control
 			return device.ErrNotFound
 		}
 		if r.Retirement == nil {
-			targetRequest := in
-			targetRequest.Handle = &device.Handle{Binding: p.Binding()}
-			targetRequest.Certificate = r.Certificate
-			certs, err := credentials.ParseCertificateChain(r.Certificate)
+			// Retiring is saved only after this observation succeeded; on a
+			// retry the old generation is already out of the policy.
+			if !r.Retiring {
+				targetRequest := in
+				targetRequest.Handle = &device.Handle{Binding: p.Binding()}
+				targetRequest.Certificate = r.Certificate
+				certs, err := credentials.ParseCertificateChain(r.Certificate)
+				if err != nil {
+					return device.ErrDenied
+				}
+				public, err := x509.MarshalPKIXPublicKey(certs[0].PublicKey)
+				if err != nil {
+					return device.ErrDenied
+				}
+				targetRequest.Handle.PublicKeyDigest = device.Hash(public)
+				if _, err := s.observeApplication(ctx, targetRequest); err != nil {
+					return device.ErrDenied
+				}
+				r.Retiring = true
+				if err := s.save(ctx, r); err != nil {
+					return err
+				}
+			}
+			acl, err := s.writeACL(ctx)
 			if err != nil {
-				return device.ErrDenied
-			}
-			public, err := x509.MarshalPKIXPublicKey(certs[0].PublicKey)
-			if err != nil {
-				return device.ErrDenied
-			}
-			targetRequest.Handle.PublicKeyDigest = device.Hash(public)
-			if _, err := s.observeApplication(ctx, targetRequest); err != nil {
-				return device.ErrDenied
-			}
-			r.Retiring = true
-			if err := s.save(ctx, r); err != nil {
 				return err
 			}
-			if err := s.writeACL(ctx); err != nil {
-				return err
-			}
-			if err := s.restartBroker(ctx); err != nil {
+			if err := s.reloadBroker(ctx, acl); err != nil {
 				return err
 			}
 			r.Retirement = &device.Retirement{OperationID: p.OperationID, PlanDigest: p.Digest, Generation: p.ExpectedGeneration, PolicyDurable: true, SessionsTerminated: true}
@@ -706,18 +861,15 @@ func runControl(dir string) error {
 	}
 	defer s.db.Close()
 	defer s.lock.Close()
-	if err := s.writeACL(context.Background()); err != nil {
+	acl, err := s.writeACL(context.Background())
+	if err != nil {
 		return err
 	}
 	if err := s.restartBroker(context.Background()); err != nil {
 		return err
 	}
-	defer func() {
-		if s.broker != nil {
-			s.broker.Process.Kill()
-			s.broker.Wait()
-		}
-	}()
+	s.applied = acl
+	defer s.stopBroker()
 	tlsConfig, err := serverTLS(dir, "control")
 	if err != nil {
 		return err

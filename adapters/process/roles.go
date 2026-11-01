@@ -7,7 +7,7 @@ import (
 	"math"
 	"time"
 
-	"knowndevice.local/knowndevice/sdk/device"
+	"github.com/knowndevice/knowndevice/sdk/device"
 )
 
 func (c *Client) Authorize(ctx context.Context, p device.Plan, k *device.Credential) error {

@@ -42,6 +42,9 @@ certificates and observations, never operational private keys. The reference
 control service holds the CA provisioner; it issues scoped tokens only in memory.
 The device has an operational signer or a separate unique recovery signer.
 The application has read-only slots; the responder has its own service key.
+In the reference lab the control service also connects to the broker with its
+service certificate. Its ACL allows only the readiness request/response topics
+it uses to confirm that the responder is back after a broker restart.
 
 ## Durable transition
 

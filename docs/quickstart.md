@@ -8,8 +8,10 @@ This guide retains the v1alpha1 reference path. The
 [explicit credential profile guide](reference/credential-profiles.md) creates a
 separate fresh v1alpha2 lab; existing reference identities/stores are not converted.
 
-Install Go 1.27.2, Python 3.11+, Bash, Make and Docker with Compose running Linux
-containers. From the repository root:
+Install Go 1.27.3, Python 3.11+, Bash, Make, a C compiler and Docker with
+Compose running Linux containers. The race tests in `make check` need the C
+compiler: `build-essential` on Debian or Ubuntu, the Xcode Command Line Tools on
+macOS. From the repository root:
 
 ```sh
 make check
@@ -34,7 +36,16 @@ For a new generated lab, copy the built Linux artifacts before startup:
 mkdir -p .work/reference/artifacts
 cp bin/kd-reference-linux-* bin/knowndevice-linux-* .work/reference/artifacts/
 export KNOWNDEVICE_LAB_BIN_DIR="$PWD/.work/reference/artifacts"
+export KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
 ```
+
+`KNOWNDEVICE_LAB_USER` runs the containers as your user. The journal and key
+store refuse files owned by another user, and Docker Engine on Linux keeps the
+host ownership of the seeded files. Unset, the containers run as root, which
+works only where Docker maps ownership, as Docker Desktop does. Rootless Docker
+maps container root to your user
+([UID/GID mapping](https://docs.docker.com/engine/security/rootless/uid-gid-mapping/)),
+so leave the variable unset there. Rootless Docker and Podman are not tested.
 
 Compose uses `bin/` by default. Rebuilding a bind-mounted file during a run can
 invalidate the running artifact; use a new directory and fresh seed for another
@@ -56,6 +67,13 @@ read-only access to slots; the responder has its own certificate. Broker policy
 changes restart all MQTT clients. A probe during reconnect can return `unknown`;
 a later fresh observation is required.
 
+Registration and retirement change broker policy. The control service restarts
+the broker and answers only after the restarted broker delivers a readiness
+message to the responder and the responder echoes it. Only the control service
+may publish on that topic. Restart and wait together are bounded to four fifths
+of `requestTimeoutSeconds` (4 seconds in this lab); after that the answer is
+`unknown`. A retry of the same request waits again without another restart.
+
 ## Enrollment and rotation
 
 ```sh
@@ -64,6 +82,11 @@ docker compose -f lab/compose.yaml run --rm device apply --plan /lab/device/plan
 docker compose -f lab/compose.yaml run --rm device status --config /lab/device.json
 docker compose -f lab/compose.yaml run --rm device probe --config /lab/device.json
 ```
+
+`apply` ends with outcome `succeeded` when the responder reconnects within
+that bound. On a slow or overloaded host it can stop with
+`remote-outcome-unknown`; run the `reconcile` command below until the outcome
+is `succeeded`.
 
 Plans expire after ten minutes here. Do not edit their fields or digests.
 `status` reads metadata and reports health as `unknown`; `probe` sends a new

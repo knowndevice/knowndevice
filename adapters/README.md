@@ -85,7 +85,7 @@ reading a protected peer certificate alert (42, 45 or 46). It sends no MQTT
 application request and cannot authorize use of the old key. Only that alert
 sets `tlsObservation: denied`. Local expiry checks, timeouts, untrusted servers,
 TLS 1.2, missing alerts and ordinary errors cannot replace the evidence.
-Go 1.27.2 uses a private `crypto/tls.alert` numeric error for TCP. The observer
+Go 1.27 uses a private `crypto/tls.alert` numeric error for TCP. The observer
 accepts only the exact package, type and numeric kind under a typed remote
 `net.OpError`; changed representations return `unknown`. It uses no unsafe
 access or text matching.

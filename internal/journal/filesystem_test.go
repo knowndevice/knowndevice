@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"knowndevice.local/knowndevice/internal/device"
-	"knowndevice.local/knowndevice/internal/keystore"
+	"github.com/knowndevice/knowndevice/internal/device"
+	"github.com/knowndevice/knowndevice/internal/keystore"
 	"modernc.org/sqlite"
 )
 
