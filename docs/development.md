@@ -3,8 +3,9 @@
 Use Go 1.27.3, Python 3.11 or newer and a C compiler for the race tests
 (`build-essential` on Debian or Ubuntu). Go dependencies are pinned in go.mod
 and verified by go.sum; scripts use the Python standard library. `make check` runs
-repository checks, maintenance-script tests, Go formatting, vet, race
-tests, and builds. Logs go to `.cache/checks`; binaries go to `bin`.
+repository checks, the Go toolchain check, workflow lint, the vulnerability
+scan, maintenance-script tests, Go formatting, vet, race tests, and builds.
+Logs go to `.cache/checks`; binaries go to `bin`.
 The gate also tests/runs the standalone public-import SDK consumer and builds
 the process wrapper. `KNOWNDEVICE_BIN_DIR` may select a separate artifact output
 directory; active labs must use their separately copied immutable artifacts.
@@ -19,7 +20,61 @@ make demo
 Go caches are local to `.cache` when running the gate, so the process does
 not need to modify global caches. A Python version can be selected with
 `KNOWNDEVICE_PYTHON`. The gate discovers a local Python 3.11+ if the default
-`python3` is older. It never installs tools or launches model sessions.
+`python3` is older. It does not install system packages, change global Go
+installs or settings, or launch model sessions. It does download the pinned Go
+toolchain and builds actionlint and govulncheck with `go run`, all inside
+`.cache`.
+
+## What the gate needs
+
+| Gate | Needs | Fails when |
+| --- | --- | --- |
+| `go-toolchain` | The Go release in `.go-version`; network access the first time | The go command it ends up with reports another version |
+| `workflows` | `shellcheck` on `PATH`; network access the first time | actionlint or shellcheck reports a finding in `.github/workflows`, or `shellcheck` is missing |
+| `vulnerabilities` | Network access to the Go module proxy, checksum database and vuln.go.dev on every run | govulncheck reports a called vulnerable symbol that is not in [the accepted list](security/vulnerability-exceptions.md) |
+
+The gate switches to the pinned toolchain and rejects any other version it
+ends up with. It sets `GOTOOLCHAIN=go<version from .go-version>`; when the
+installed `go` is another release, the go command downloads that exact
+toolchain into `.cache/go-mod`, verified through the Go checksum database.
+Formatting uses that toolchain's `gofmt`. A `GOTOOLCHAIN` value set in the
+environment is replaced for the gate. Offline, the toolchain
+and workflow gates work only from an already filled `.cache/go-mod`, and the
+vulnerability scan fails.
+
+Tool versions are pinned: actionlint v1.7.12 in `scripts/ci_local.sh` and
+govulncheck v1.9.0 in `scripts/vuln_check.py`. Both are built with `go run`
+from modules verified through the checksum database. `shellcheck` comes from
+`PATH`; GitHub's Ubuntu 24.04 images ship it, and on macOS `brew install
+shellcheck` provides it. Its version can differ between machines.
+
+`bash scripts/ci_local.sh audit` runs only the three gates above.
+`bash scripts/ci_local.sh docs` runs only the repository check.
+
+## Hosted checks
+
+Quality runs `make check`, `make demo` and the lab matrix on amd64 and arm64.
+The lab step stops after 50 minutes. When a step fails, Quality scans the lab
+matrix's `logs/` and `summary.txt` with `scripts/secret_scan.py` and uploads
+only those two paths as the `lab-matrix-logs-<arch>-attempt-<n>` artifact.
+The matrix directory also holds generated demo keys, which are never
+uploaded. If the scan finds a private-key header, `PRIVATE KEY` text, a
+base64 DER private key, a private JWK member, a token-shaped string, a
+symbolic link, a special file or a directory it cannot list, nothing is
+uploaded and the step fails, naming only the files.
+
+The DCO workflow runs a check named `dco` on every pull request. It fails when
+a non-merge commit between the base and head commits has no
+`Signed-off-by: Name <email>` trailer. Merge commits are not checked, and the
+sign-off is not matched to the commit author. The checker script comes from
+the base commit, so a pull request cannot weaken it by editing the script. The
+workflow file itself runs from the pull request, so changes to
+`.github/workflows/dco.yml` need maintainer review. `dco` is not a required
+check until the branch ruleset names it. Run the checker locally before pushing:
+
+```sh
+python3 scripts/dco_check.py --base origin/main --head HEAD
+```
 
 ## Code conventions
 

@@ -38,4 +38,33 @@ jobs:
       - name: Run documented model examples
         run: make demo
       - name: Run the native reference and profile lab matrix
-        run: bash scripts/lab_matrix.sh "${{ matrix.arch }}"
+        # A hang fails this step, so the scan and upload below still run.
+        timeout-minutes: 50
+        env:
+          KNOWNDEVICE_MATRIX_DIR: ${{ runner.temp }}/knowndevice-lab-matrix
+          ARCH: ${{ matrix.arch }}
+        run: bash scripts/lab_matrix.sh "$ARCH"
+      # The matrix directory also holds generated demo keys outside logs/;
+      # only logs/ and summary.txt may leave the runner, and only after the scan.
+      - name: Scan lab logs for secret markers
+        id: scan
+        if: failure()
+        env:
+          MATRIX_DIR: ${{ runner.temp }}/knowndevice-lab-matrix
+        run: |
+          if [[ ! -d "$MATRIX_DIR/logs" ]]; then
+            echo "The lab matrix did not start; no logs to upload."
+            exit 0
+          fi
+          python3 scripts/secret_scan.py "$MATRIX_DIR/logs" --file "$MATRIX_DIR/summary.txt"
+          echo "upload=true" >> "$GITHUB_OUTPUT"
+      - name: Upload lab logs
+        if: failure() && steps.scan.outputs.upload == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-matrix-logs-${{ matrix.arch }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/knowndevice-lab-matrix/logs/
+            ${{ runner.temp }}/knowndevice-lab-matrix/summary.txt
+          if-no-files-found: warn
+          retention-days: 14
