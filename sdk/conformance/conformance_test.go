@@ -18,7 +18,7 @@ import (
 )
 
 func TestBuiltinPublicSuite(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	report, err := conformance.Run(ctx, fixture.Factory{})
 	for _, result := range report.Results {

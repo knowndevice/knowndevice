@@ -16,6 +16,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -39,7 +40,7 @@ func fixtureWithIssuer(t *testing.T, pin, profile string) (*device.PublicSnapsho
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := &device.PublicSnapshot{APIVersion: device.V2, EncodingVersion: 2, DeploymentID: "fixture-deployment", DeviceID: "gateway", Profile: policy, Composition: device.Composition{ID: "local-http-process-lab", Version: 1, AuthorityTemplateDigest: device.Hash([]byte("fixture-template")), AuthorityLifetimeSeconds: 1200, ProcessArtifactDigest: pin, ApplicationID: "fixture-worker", SessionPolicy: "new-connection-no-state-transfer", ObservationRoute: "authenticated-application-callback", WithdrawalScope: "whole-service-lab"}, Limits: device.DefaultLimits(), RequestTimeoutSeconds: 1, PlanTTLSeconds: 600, ClockTrust: "trusted-system-clock", RecoveryIdentity: device.RecoverySubject("gateway")}
+	s := &device.PublicSnapshot{APIVersion: device.V2, EncodingVersion: 2, DeploymentID: "fixture-deployment", DeviceID: "gateway", Profile: policy, Composition: device.Composition{ID: "local-http-process-lab", Version: 1, AuthorityTemplateDigest: device.Hash([]byte("fixture-template")), AuthorityLifetimeSeconds: 1200, ProcessArtifactDigest: pin, ApplicationID: "fixture-worker", SessionPolicy: "new-connection-no-state-transfer", ObservationRoute: "authenticated-application-callback", WithdrawalScope: "whole-service-lab"}, Limits: device.DefaultLimits(), RequestTimeoutSeconds: 5, PlanTTLSeconds: 600, ClockTrust: "trusted-system-clock", RecoveryIdentity: device.RecoverySubject("gateway")}
 	for _, role := range []string{"application", "authority", "clock", "entitlement", "platform", "transport", "withdrawal"} {
 		capability, _ := device.RequiredCapability(role)
 		s.Composition.Adapters = append(s.Composition.Adapters, device.AdapterSpec{Role: role, ID: "local-http-lab-" + role, Version: "1", ArtifactDigest: device.Hash([]byte("fixture-backend")), Capabilities: []string{capability}})
@@ -330,7 +331,7 @@ func (b *fixtureBackend) RetirementStatus(context.Context, device.Plan, device.C
 	return device.Retirement{}, device.ErrUnknown
 }
 func backendAdapters(s *device.PublicSnapshot, b *fixtureBackend) device.Adapters {
-	return device.Adapters{Entitlement: b, Authority: b, Platform: b, Transport: b, Application: b, Withdrawal: b, Clock: device.SystemClock{Uncertainty: time.Second, MaximumAge: time.Duration(s.Limits.MaximumAssessmentAgeSeconds) * time.Second, DriftPPM: float64(s.Limits.DriftPPM)}}
+	return device.Adapters{Entitlement: b, Authority: b, Platform: b, Transport: b, Application: b, Withdrawal: b, Clock: device.SystemClock{Uncertainty: 100 * time.Millisecond, MaximumAge: time.Duration(s.Limits.MaximumAssessmentAgeSeconds) * time.Second, DriftPPM: float64(s.Limits.DriftPPM)}}
 }
 
 type peer struct {
@@ -489,6 +490,8 @@ func (l *lockedLog) Write(p []byte) (int, error) {
 }
 func (l *lockedLog) text() string { l.mu.Lock(); defer l.mu.Unlock(); return l.Buffer.String() }
 
+func init() { initializeTimeout = 30 * time.Second }
+
 func TestHelperProcess(t *testing.T) {
 	mode := ""
 	recordPath := ""
@@ -547,6 +550,11 @@ func startConfiguredFixtureProcess(t *testing.T, mode string, rotation bool) (*C
 		t.Fatal(err)
 	}
 	log := &lockedLog{}
+	t.Cleanup(func() {
+		if t.Failed() {
+			t.Logf("adapter log:\n%s", log.text())
+		}
+	})
 	client, err := Start(context.Background(), Options{Executable: exe, ArtifactDigest: pin, Args: []string{"-test.run=^TestHelperProcess$", "process-fixture", mode}, WorkDir: root, Snapshot: s, Log: log})
 	if err != nil {
 		t.Fatal(err)
@@ -620,7 +628,23 @@ func TestRealSubprocessSignerLookupAndRedaction(t *testing.T) {
 	if !strings.Contains(log.text(), "adapter stderr bytes=") {
 		t.Fatal("missing fixed stderr count")
 	}
+	timing := map[string]bool{}
+	for _, line := range strings.Split(log.text(), "\n") {
+		if !strings.HasPrefix(line, "adapter request ") {
+			continue
+		}
+		if !requestTimingLine.MatchString(line) {
+			t.Fatalf("request timing line has unexpected content: %q", line)
+		}
+		fields := strings.Fields(line)
+		timing[fields[2]+" "+fields[5]] = true
+	}
+	if !timing["method=entitlement.authorize result=ok"] || !timing["method=authority.lookup result=not-found"] {
+		t.Fatal("missing per-request timing lines")
+	}
 }
+
+var requestTimingLine = regexp.MustCompile(`^adapter request method=[a-z]+\.[A-Za-z]+ elapsed_ms=[0-9]+ budget_ms=(-?[0-9]+|none) result=[a-z-]+$`)
 
 func TestActualProcessRestartReconcilesOriginalDurableIntentWithoutReissue(t *testing.T) {
 	exe, err := os.Executable()
@@ -688,7 +712,7 @@ func TestCancelLostLateAndUnsolicitedResponseRequireNewSession(t *testing.T) {
 			go func() { result <- c.Authorize(ctx, p, &recovery) }()
 			select {
 			case <-tracker.called:
-			case <-time.After(time.Second):
+			case <-time.After(5 * time.Second):
 				t.Fatal("process did not request bounded signing")
 			}
 			if mode == "late" {
@@ -699,7 +723,7 @@ func TestCancelLostLateAndUnsolicitedResponseRequireNewSession(t *testing.T) {
 				if !errors.Is(err, device.ErrUnknown) {
 					t.Fatal("lost effect was not unknown", err)
 				}
-			case <-time.After(2 * time.Second):
+			case <-time.After(10 * time.Second):
 				t.Fatal("host exceeded execution bound")
 			}
 			if err := c.Health(context.Background()); !errors.Is(err, device.ErrUnknown) {

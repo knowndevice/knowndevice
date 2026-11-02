@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      race_timing_count:
+        description: "Also measure timing-bound race tests with go test -count N (0 skips)"
+        type: number
+        default: 0
 
 permissions:
   contents: read
@@ -35,6 +40,11 @@ jobs:
           cache: false
       - name: Run the same local gate
         run: make check
+      - name: Measure timing-bound race tests
+        if: inputs.race_timing_count > 0
+        env:
+          COUNT: ${{ inputs.race_timing_count }}
+        run: python3 scripts/race_timing.py run --out .cache/timing/hosted --count "$COUNT"
       - name: Run documented model examples
         run: make demo
       - name: Run the native reference and profile lab matrix

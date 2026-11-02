@@ -94,6 +94,10 @@ development profile.
   current user". `scripts/lab_matrix.sh` sets it to the calling user, or to
   root under rootless Docker, where container root is the calling user.
 - List the C compiler that the race tests need.
+- Add `scripts/race_timing.py` and Quality input `race_timing_count` to measure
+  race tests with host load, plus per-request process timing behind
+  `KNOWNDEVICE_PROCESS_TIMING`. Scale test budgets and adjust test clocks and
+  fixtures based on measurements; product limits stay unchanged.
 - The reference lab control service answers registration and retirement only
   after the restarted broker delivers a readiness message to the responder and
   the responder echoes it, bounded to four fifths of the request timeout.

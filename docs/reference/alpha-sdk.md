@@ -99,6 +99,9 @@ Keep copied artifacts immutable while mounted; do not rebuild those paths.
 The CLI selects `kd-adapter` beside its executable by default. Per-command
 `KNOWNDEVICE_PROCESS_ADAPTER` may select an absolute path, whose exact bounded
 regular-file digest must still match the snapshot. It grants no new authority.
+Per-command `KNOWNDEVICE_PROCESS_TIMING=1` writes one stderr line per adapter
+request with the method, elapsed and available milliseconds, and a coarse
+result. The lines contain no identifiers, payloads or key material.
 `KNOWNDEVICE_BIN_DIR` selects a separate gate build output directory. These
 values affect only the invoked process, without global configuration changes.
 

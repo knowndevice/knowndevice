@@ -47,7 +47,11 @@ func processClient(ctx context.Context, c device.Config, s *device.PublicSnapsho
 	if err := os.MkdirAll(workDir, 0700); err != nil {
 		return nil, device.ErrDenied
 	}
-	client, err := process.Start(ctx, process.Options{Executable: path, ArtifactDigest: s.Composition.ProcessArtifactDigest, WorkDir: workDir, Snapshot: s})
+	opts := process.Options{Executable: path, ArtifactDigest: s.Composition.ProcessArtifactDigest, WorkDir: workDir, Snapshot: s}
+	if os.Getenv("KNOWNDEVICE_PROCESS_TIMING") == "1" {
+		opts.Log = os.Stderr
+	}
+	client, err := process.Start(ctx, opts)
 	if err != nil {
 		return nil, err
 	}

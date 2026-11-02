@@ -49,6 +49,16 @@ func checkReport(t *testing.T, expected expectations, report conformance.Report)
 	}
 }
 
+func reportFailure(t *testing.T, name string, report conformance.Report, err error) {
+	t.Helper()
+	for _, result := range report.Results {
+		if result.Status != "pass" {
+			t.Errorf("%s/%s: %s", result.ProfileID, result.Case, result.Reason)
+		}
+	}
+	t.Fatalf("%s public conformance failed: %v", name, err)
+}
+
 func TestPublicConformance(t *testing.T) {
 	data, err := os.ReadFile("fixtures/expectations.json")
 	if err != nil {
@@ -65,7 +75,7 @@ func TestPublicConformance(t *testing.T) {
 		return roles, func() error { return nil }, err
 	}})
 	if err != nil {
-		t.Fatal("built-in public conformance failed")
+		reportFailure(t, "built-in", builtin, err)
 	}
 	checkReport(t, expected, builtin)
 	workDir, err := filepath.EvalSymlinks(t.TempDir())
@@ -92,7 +102,7 @@ func TestPublicConformance(t *testing.T) {
 		return client.Adapters(), client.Close, nil
 	}})
 	if err != nil {
-		t.Fatal("process public conformance failed")
+		reportFailure(t, "process", remote, err)
 	}
 	checkReport(t, expected, remote)
 }
