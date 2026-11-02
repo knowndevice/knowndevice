@@ -2,7 +2,7 @@ name: knowndevice-reference
 services:
   step-ca:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    image: smallstep/step-ca:0.30.2@sha256:a2b17872915c193259b75a5474c398326f41bd199f0842093e52cf4182bc8270
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["step-ca"]
     command: ["/lab/ca/ca.json"]
@@ -16,7 +16,7 @@ services:
       retries: 20
   broker-control:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: eclipse-mosquitto:2.0.22@sha256:199ea8ef2e35ec2b1b37e59cfd1dbae538ed4dfa4a2251a121a52215a6248a21
+    image: eclipse-mosquitto:2.0.22@sha256:09b62ff32c2e7b64d4b431b9a89236073289b68db273de2b089edeb9b0d92b5c
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/lab/kd-reference"]
     command: ["control", "--dir", "/lab"]
@@ -32,7 +32,7 @@ services:
       - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/broker:/lab/broker
   application:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    image: smallstep/step-ca:0.30.2@sha256:a2b17872915c193259b75a5474c398326f41bd199f0842093e52cf4182bc8270
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/lab/kd-reference"]
     command: ["application", "--dir", "/lab"]
@@ -47,7 +47,7 @@ services:
       - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/fixtures:/lab/fixtures:ro
   responder:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    image: smallstep/step-ca:0.30.2@sha256:a2b17872915c193259b75a5474c398326f41bd199f0842093e52cf4182bc8270
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/lab/kd-reference"]
     command: ["responder", "--dir", "/lab"]
@@ -61,7 +61,7 @@ services:
       - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/fixtures:/lab/fixtures:ro
   device:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    image: smallstep/step-ca:0.30.2@sha256:a2b17872915c193259b75a5474c398326f41bd199f0842093e52cf4182bc8270
     profiles: ["tools"]
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/lab/knowndevice"]
@@ -75,7 +75,7 @@ services:
       - ${KNOWNDEVICE_LAB_DIR:-../.work/reference}/recovery:/lab/recovery:ro
   checks:
     platform: linux/${KNOWNDEVICE_LAB_ARCH:-arm64}
-    image: smallstep/step-ca:0.29.0@sha256:de5d0c3fa983b27a7ec09f1fa403b4fb90932f011840a191b1283b90d24edf11
+    image: smallstep/step-ca:0.30.2@sha256:a2b17872915c193259b75a5474c398326f41bd199f0842093e52cf4182bc8270
     profiles: ["tools"]
     user: "${KNOWNDEVICE_LAB_USER:-0:0}"
     entrypoint: ["/usr/local/bin/kd-reference"]

@@ -7,7 +7,7 @@ It does not establish support for another CA, broker, application or hardware.
 | --- | --- | --- |
 | Linux file store | ECDSA P-256, PKCS#8, two software slots | Implemented; privileged administrators can copy keys; no hardware erasure claim |
 | SQLite | modernc.org/sqlite 1.61.0, schema 1 or fresh 2, WAL/FULL | Implemented; lock/revision/fence; unknown versions refused; no migration tool |
-| Smallstep step-ca | 0.29.0, digest-pinned | Actual /sign and passive revoke; no raw issuance lookup; unknown needs evidence or intervention |
+| Smallstep step-ca | 0.30.2, digest-pinned | Actual /sign and passive revoke; no raw issuance lookup; unknown needs evidence or intervention |
 | Eclipse Mosquitto | 2.0.22, digest-pinned | mTLS, generational ACL, synced replacement and whole-broker restart |
 | MQTT / responder | eclipse/paho.golang 0.23.0, MQTT 5 | External bound nonce; explicit ACL denial for a valid old certificate |
 | Reference application | Independent worker | Old session retained until candidate verification and durable activation; control independently observes it |

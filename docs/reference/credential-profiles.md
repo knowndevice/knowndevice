@@ -66,7 +66,7 @@ Seed copies and syncs those artifacts into the fresh lab directory. Keep them
 immutable while that run is active. Rebuilding
 `bin/` must not replace a live lab's selected artifacts.
 
-The lab uses real step-ca 0.29.0 `/sign` through an authenticated local issuance
+The lab uses real step-ca 0.30.2 `/sign` through an authenticated local issuance
 endpoint, a peer-derived HTTP/TLS enforcer and a separate application process.
 [Compose](../../lab/profiles/compose.yaml) pins the image. The
 [stable template](../../lab/profiles/stable-client.tpl) specifies a single
@@ -86,8 +86,8 @@ Import is an explicit authenticated operation for that exact unknown reservation
 Multiple candidate leaves, a different key/profile/issuer, expired target or
 changed CSR are refused. step-ca has no assumed Known Device operation lookup
 or idempotent issuance contract.
-[The pinned sign handler](https://github.com/smallstep/certificates/blob/v0.29.0/api/sign.go)
-and [authority source](https://github.com/smallstep/certificates/blob/v0.29.0/authority/tls.go)
+[The pinned sign handler](https://github.com/smallstep/certificates/blob/v0.30.2/api/sign.go)
+and [authority source](https://github.com/smallstep/certificates/blob/v0.30.2/authority/tls.go)
 separate issuance from storage/response success.
 
 For a new short-lived evidence lab, seed with

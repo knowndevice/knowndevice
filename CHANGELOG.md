@@ -89,6 +89,8 @@ development profile.
   their indirect modules, with license files and generated adapter templates.
 - Retry the lab responder's connection when an MQTT subscription fails, so a
   broker restart during SUBSCRIBE no longer leaves the responder stopped.
+- Update the reference and profile labs from step-ca 0.29.0 to 0.30.2 and name
+  the new version in the documents that describe the current labs.
 - Pin Go to `.go-version` and reject other versions; lint workflows with
   actionlint and shellcheck; fail on called govulncheck findings without
   reviewed exceptions. Run a `dco` sign-off check on pull requests; upload
