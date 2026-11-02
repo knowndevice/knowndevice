@@ -84,6 +84,8 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Give profile lab process compositions a 10 s request timeout, because two
+  activation requests share one process call scope.
 - Pin Go to `.go-version` and reject other versions; lint workflows with
   actionlint and shellcheck; fail on called govulncheck findings without
   reviewed exceptions. Run a `dco` sign-off check on pull requests; upload

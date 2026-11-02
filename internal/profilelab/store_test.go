@@ -38,6 +38,37 @@ func testLab(t *testing.T) (string, servicesConfig, *device.PublicSnapshot) {
 	}
 	return path, cfg, snapshot
 }
+func TestProcessCompositionRequestTimeoutCoversTwoRequests(t *testing.T) {
+	executable, e := os.Executable()
+	if e != nil {
+		t.Fatal(e)
+	}
+	base, e := filepath.EvalSymlinks(t.TempDir())
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, tc := range []struct {
+		name, composition, processArtifact string
+		seconds                            int
+	}{
+		{"built-in", "local-http-lab", "", 5},
+		{"process", "local-http-process-lab", executable, 10},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(base, tc.name)
+			if e := seedWithProcessArtifact(path, credentialprofile.StableID, executable, executable, 1200, tc.processArtifact); e != nil {
+				t.Fatal(e)
+			}
+			_, snapshot, e := loadServices(path)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if snapshot.Composition.ID != tc.composition || snapshot.RequestTimeoutSeconds != tc.seconds {
+				t.Fatalf("composition %s has request timeout %d s, want %s with %d s", snapshot.Composition.ID, snapshot.RequestTimeoutSeconds, tc.composition, tc.seconds)
+			}
+		})
+	}
+}
 func testPlan(t *testing.T, s *device.PublicSnapshot, expected, target uint64) device.Plan {
 	t.Helper()
 	id, e := device.RandomID()
