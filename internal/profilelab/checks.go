@@ -329,7 +329,7 @@ func (c *checks) rotateAt(phase string) error {
 	if !reached {
 		_ = cmd.Process.Kill()
 		<-done
-		return fmt.Errorf("profile checkpoint %s not reached", phase)
+		return fmt.Errorf("profile checkpoint %s not reached: %s", phase, strings.TrimSpace(stderr.String()))
 	}
 	if e = cmd.Process.Kill(); e != nil {
 		return e
