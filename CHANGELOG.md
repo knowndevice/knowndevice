@@ -20,8 +20,8 @@ development profile.
   generation-specific withdrawal and separate scoped recovery.
 - Added a digest-pinned generated-data lab, killed-process checkpoint tests,
   actual filesystem-fault profiles, unknown issuance import and alpha schemas.
-  The filesystem-fault profiles run only when `KD_FS_ROOT` and `KD_FS_FAULT`
-  select a prepared filesystem, not in the default gate or CI.
+  The filesystem-fault profiles require `KD_FS_ROOT` and `KD_FS_FAULT` to
+  select a prepared filesystem and remain outside the default gate.
 
 ### Credential profiles
 
@@ -84,6 +84,9 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run and the detected Docker mode.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Add `bash scripts/fs_faults.sh --execute` for the filesystem-fault
+  profiles and a `filesystem-faults` CI job on native amd64 and arm64
+  that retains logs and summaries.
 - Retry the lab responder's connection when an MQTT subscription fails, so a
   broker restart during SUBSCRIBE no longer leaves the responder stopped.
 - Update the reference and profile labs from step-ca 0.29.0 to 0.30.2 and name
