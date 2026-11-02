@@ -2,12 +2,15 @@
 
 Use Go 1.27.3, Python 3.11 or newer and a C compiler for the race tests
 (`build-essential` on Debian or Ubuntu). Go dependencies are pinned in go.mod
-and verified by go.sum; scripts use the Python standard library. `make check` runs
-repository checks, maintenance-script tests, Go formatting, vet, race
-tests, and builds. Logs go to `.cache/checks`; binaries go to `bin`.
-The gate also tests/runs the standalone public-import SDK consumer and builds
-the process wrapper. `KNOWNDEVICE_BIN_DIR` may select a separate artifact output
-directory; active labs must use their separately copied immutable artifacts.
+and verified by go.sum; scripts use the Python standard library. `make check`
+runs repository checks, checks the Go toolchain, lints workflows, scans for
+vulnerabilities, tests maintenance scripts, checks Go formatting, runs vet
+and race tests, and builds binaries.
+Logs go to `.cache/checks`; binaries go to `bin`.
+The gate also tests and runs the standalone public-import SDK consumer and
+builds the process wrapper. `KNOWNDEVICE_BIN_DIR` may select a separate artifact
+output directory; active labs must use their separately copied immutable
+artifacts.
 
 ```sh
 make check
@@ -16,10 +19,64 @@ make build
 make demo
 ```
 
-Go caches are local to `.cache` when running the gate, so the process does
-not need to modify global caches. A Python version can be selected with
-`KNOWNDEVICE_PYTHON`. The gate discovers a local Python 3.11+ if the default
-`python3` is older. It never installs tools or launches model sessions.
+The gate keeps Go caches in `.cache`, so it does not need to change global
+caches. Select a Python version with `KNOWNDEVICE_PYTHON`. If the default
+`python3` is older, the gate finds a local Python 3.11+. It does not install
+system packages, change global Go installs or settings, or launch model
+sessions. Downloads of the pinned Go toolchain and builds of actionlint and
+govulncheck with `go run` stay inside `.cache`.
+
+## What the gate needs
+
+| Gate | Needs | Fails when |
+| --- | --- | --- |
+| `go-toolchain` | The Go release in `.go-version`; network access the first time | The selected go command reports another version |
+| `workflows` | `shellcheck` on `PATH`; network access the first time | actionlint or shellcheck reports a finding in `.github/workflows`, or `shellcheck` is missing |
+| `vulnerabilities` | Network access to the Go module proxy, checksum database and vuln.go.dev on every run | govulncheck reports a called vulnerable symbol that is not in [the accepted list](security/vulnerability-exceptions.md) |
+
+The gate selects the pinned toolchain and rejects any other version. It sets
+`GOTOOLCHAIN=go<version from .go-version>`, replacing any `GOTOOLCHAIN` value
+in the environment. When the installed `go` is another release, the go command
+downloads the exact toolchain into `.cache/go-mod` and verifies it through the
+Go checksum database. Formatting uses that toolchain's `gofmt`. Offline, the
+toolchain and workflow gates need an already filled `.cache/go-mod`; the
+vulnerability scan fails.
+
+Tool versions are pinned: actionlint v1.7.12 in `scripts/ci_local.sh` and
+govulncheck v1.9.0 in `scripts/vuln_check.py`. Both are built with `go run`
+from modules verified through the checksum database. `shellcheck` comes from
+`PATH`, so its version can differ between machines. GitHub's Ubuntu 24.04
+images include it; on macOS, install it with `brew install shellcheck`.
+
+`bash scripts/ci_local.sh audit` runs only the three gates above.
+`bash scripts/ci_local.sh docs` runs only the repository check.
+
+## Hosted checks
+
+Quality runs `make check`, `make demo` and the lab matrix on amd64 and arm64.
+The lab step stops after 50 minutes. When a step fails, Quality scans the lab
+matrix's `logs/` and `summary.txt` with `scripts/secret_scan.py`. If the scan
+passes, it uploads only those two paths as the
+`lab-matrix-logs-<arch>-attempt-<n>` artifact. Generated demo keys elsewhere
+in the matrix directory are never uploaded. If the scan finds a private-key
+header, `PRIVATE KEY` text, a base64 DER private key, a private JWK member,
+a token-shaped string, a symbolic link, a special file or a directory it
+cannot list, nothing is uploaded and the step fails. Marker failures name
+only the files and markers.
+
+The DCO workflow runs a check named `dco` on every pull request. It fails when
+a non-merge commit between the base and head commits lacks a
+`Signed-off-by: Name <email>` trailer. It skips merge commits and does not
+match the sign-off to the commit author. When the base commit contains the
+checker script, the workflow uses that copy, so editing the script in a pull
+request does not weaken the check. The workflow file runs from the pull
+request, so changes to `.github/workflows/dco.yml` need maintainer review.
+The `main` branch ruleset requires `dco`. Run the checker locally before
+pushing:
+
+```sh
+python3 scripts/dco_check.py --base origin/main --head HEAD
+```
 
 ## Code conventions
 
@@ -77,3 +134,32 @@ Local research, source specifications, planning notes, and contributor
 client configuration are excluded by `.gitignore`. Public documentation
 must stand on its own and link only to published files. The public checkout
 includes the code and checks needed to build, test, and contribute.
+
+## Timing-bound tests
+
+Some race tests bound wall-clock time and can fail on a heavily loaded host.
+Measure them with:
+
+```sh
+python3 scripts/race_timing.py run --out .cache/timing/<name> --count 3
+python3 scripts/race_timing.py summarize FILE
+```
+
+A manual Quality run with `race_timing_count` above 0 measures on both hosted
+runners after the gate. Record each result with the host's one-minute load;
+rerun a load-induced failure before calling it a defect.
+
+| Test or fixture | Bound | Decision |
+| --- | --- | --- |
+| Process adapter start-up | 5 s default; package tests 30 s | Scale only package tests, whose adapter is the race-enabled test binary. |
+| Process test snapshot requests | 1 s to 5 s | Scale the signing-request wait from 1 s to 5 s and the result wait from 2 s to 10 s. |
+| Process test adapter clock uncertainty | 1 s to 100 ms | Leave more time for the assessment round trip; the product limit stays 2,000 ms. |
+| `TestBuiltinPublicSuite` | 1 to 3 minutes | Scale the suite context; the 30 s per-case context stays unchanged. |
+| Controller live-proof tests | Fixed clock; 5 s evidence age unchanged | Set the fresh observation 500 ms after the stored one; retain replay rejection after reopening the journal. |
+| Profile lab delayed-handshake test | 100 ms to 1 s context deadline | Keep the deadline below the 2.2 s signer delay; plan lifetime stays 3 s. |
+| `TestBlockedServerOutputRespectsContext` | 1 s teardown | Retain; no measured failures. |
+
+With `KNOWNDEVICE_PROCESS_TIMING=1`, the CLI prints one line per process
+adapter request to stderr. The profile lab sets it for controller commands and
+shows the log when a command fails. Process adapter tests print the log when
+they fail.

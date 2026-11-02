@@ -15,7 +15,8 @@ EXCLUDED = {".git", ".cache", ".work", ".private", ".venv", "bin", "dist", "__py
 
 def files(root):
     for directory, dirs, names in os.walk(root):
-        dirs[:] = [d for d in dirs if d not in EXCLUDED]
+        # A nested checkout, such as a worktree under .claude/worktrees, is another repository.
+        dirs[:] = [d for d in dirs if d not in EXCLUDED and not os.path.lexists(os.path.join(directory, d, ".git"))]
         for name in names:
             yield Path(directory) / name
 
@@ -84,7 +85,7 @@ def check(root, publication=False):
     for name in ("AGENTS.md", "CLAUDE.md"):
         if (root / name).exists() and len((root / name).read_text().splitlines()) > 150:
             errors.append(f"{name}: startup instructions exceed 150 lines")
-    for path in (root / ".claude").rglob("*.md"):
+    for path in (p for p in files(root / ".claude") if p.suffix == ".md"):
         if "/rules/" in path.as_posix() or path.name == "SKILL.md" or "/agents/" in path.as_posix():
             try:
                 data = frontmatter(path)

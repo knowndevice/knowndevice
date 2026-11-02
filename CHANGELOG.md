@@ -79,13 +79,28 @@ development profile.
 - Add `scripts/lab_matrix.sh`, which runs the reference and both profile labs
   with built-in and generated-process adapters for one Linux architecture.
   CI runs it natively on amd64 and arm64.
+- Report PASS, SKIP or FAIL for every step in `scripts/lab_matrix.sh`, with
+  exit codes for PASS and FAIL. Add `--cell NAME` to run one cell. Record the
+  load average at start and end in `summary.txt`, along with any `kd-*`
+  containers and networks left after the run and the detected Docker mode.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Retry the lab responder's connection when an MQTT subscription fails, so a
+  broker restart during SUBSCRIBE no longer leaves the responder stopped.
+- Pin Go to `.go-version` and reject other versions; lint workflows with
+  actionlint and shellcheck; fail on called govulncheck findings without
+  reviewed exceptions. Run a `dco` sign-off check on pull requests; upload
+  scanned `logs/` and `summary.txt` when a lab run fails.
+- Require the `dco` check on `main`, alongside both native Quality jobs.
 - Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
   On Docker Engine for Linux, root containers could not use the seeded state:
   `init` and the lab checks stopped with "journal storage must be owned by the
   current user". `scripts/lab_matrix.sh` sets it to the calling user, or to
   root under rootless Docker, where container root is the calling user.
 - List the C compiler that the race tests need.
+- Add `scripts/race_timing.py` and Quality input `race_timing_count` to measure
+  race tests with host load, plus per-request process timing behind
+  `KNOWNDEVICE_PROCESS_TIMING`. Scale test budgets and adjust test clocks and
+  fixtures based on measurements; product limits stay unchanged.
 - The reference lab control service answers registration and retirement only
   after the restarted broker delivers a readiness message to the responder and
   the responder echoes it, bounded to four fifths of the request timeout.

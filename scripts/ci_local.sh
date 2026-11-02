@@ -5,7 +5,8 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 mode="${1:-all}"
-case "$mode" in all|test|build|docs) ;; *) echo "Usage: bash scripts/ci_local.sh [all|test|build|docs]" >&2; exit 2 ;; esac
+case "$mode" in all|test|build|docs|audit) ;; *) echo "Usage: bash scripts/ci_local.sh [all|test|build|docs|audit]" >&2; exit 2 ;; esac
+actionlint_module="github.com/rhysd/actionlint/cmd/actionlint@v1.7.12"
 
 python="${KNOWNDEVICE_PYTHON:-}"
 if [[ -z "$python" ]]; then
@@ -21,7 +22,11 @@ if [[ -z "$python" ]]; then echo "Python 3.11+ is required; no tools were instal
 export PYTHONDONTWRITEBYTECODE=1
 export GOCACHE="${GOCACHE:-$root/.cache/go-build}"
 export GOMODCACHE="${GOMODCACHE:-$root/.cache/go-mod}"
-export GOTOOLCHAIN=local
+go_version="$(tr -d '[:space:]' < .go-version)"
+if [[ ! "$go_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo ".go-version must hold one Go release such as 1.27.3" >&2; exit 2; fi
+# The go command fetches this exact toolchain into GOMODCACHE when the installed
+# go differs, verified through the Go checksum database.
+export GOTOOLCHAIN="go$go_version"
 check_dir="${KNOWNDEVICE_CHECK_DIR:-.cache/checks}"
 binary_dir="${KNOWNDEVICE_BIN_DIR:-bin}"
 mkdir -p "$check_dir" "$binary_dir"
@@ -39,6 +44,30 @@ gate() {
   fi
 }
 
+go_toolchain() {
+  local actual
+  actual="$(go env GOVERSION)" || return
+  echo "go $actual from $(go env GOROOT); .go-version requires go$go_version"
+  [[ "$actual" == "go$go_version" ]]
+}
+
+workflow_lint() {
+  local shellcheck_bin
+  # actionlint skips shell checks silently when shellcheck is absent.
+  if ! shellcheck_bin="$(command -v shellcheck)"; then
+    echo "shellcheck is required on PATH for the workflow check" >&2
+    return 127
+  fi
+  "$shellcheck_bin" --version
+  go run "$actionlint_module" -color=false -shellcheck="$shellcheck_bin" -pyflakes= .github/workflows/*.yml
+}
+
+go_format() {
+  local gofmt_bin
+  gofmt_bin="$(go env GOROOT)/bin/gofmt" || return
+  GOFMT="$gofmt_bin" "$python" -c 'import os, pathlib, subprocess, sys; files = [str(p) for folder in ("cmd", "internal", "adapters", "api", "sdk", "examples") for p in pathlib.Path(folder).rglob("*.go")]; r = subprocess.run([os.environ["GOFMT"], "-l", *files], capture_output=True, text=True); print(r.stdout, end=""); print(r.stderr, end="", file=sys.stderr); sys.exit(r.returncode or bool(r.stdout))'
+}
+
 external_sdk() {
   (
     cd examples/sdk-consumer
@@ -50,9 +79,16 @@ external_sdk() {
 if [[ "$mode" == all || "$mode" == docs ]]; then
   gate repository "$python" scripts/check_repository.py
 fi
+if [[ "$mode" != docs ]]; then
+  gate go-toolchain go_toolchain
+fi
+if [[ "$mode" == all || "$mode" == audit ]]; then
+  gate workflows workflow_lint
+  gate vulnerabilities "$python" scripts/vuln_check.py
+fi
 if [[ "$mode" == all || "$mode" == test ]]; then
   gate script-tests "$python" -m unittest discover -s tests/scripts -p 'test_*.py' -v
-  gate go-format "$python" -c 'import pathlib, subprocess, sys; files = [str(p) for folder in ("cmd", "internal", "adapters", "api", "sdk", "examples") for p in pathlib.Path(folder).rglob("*.go")]; r = subprocess.run(["gofmt", "-l", *files], capture_output=True, text=True); print(r.stdout, end=""); print(r.stderr, end="", file=sys.stderr); sys.exit(r.returncode or bool(r.stdout))'
+  gate go-format go_format
   gate go-vet go vet ./...
   # Process adapter tests bound subprocess startup in wall-clock time; concurrent
   # compilation on a cold cache can exceed those bounds, so compile first.

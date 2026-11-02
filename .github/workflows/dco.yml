@@ -1,0 +1,36 @@
+name: DCO
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dco-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dco:
+    name: dco
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # The checker comes from the base commit so a pull request cannot weaken
+      # its own check; the head copy is used only before the base has one.
+      - name: Require Signed-off-by on every commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          checker="$RUNNER_TEMP/dco_check.py"
+          if git cat-file -e "$BASE_SHA:scripts/dco_check.py" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/dco_check.py" > "$checker"
+          else
+            cp scripts/dco_check.py "$checker"
+          fi
+          python3 -I "$checker" --repo . --base "$BASE_SHA" --head "$HEAD_SHA"

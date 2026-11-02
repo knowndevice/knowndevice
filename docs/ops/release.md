@@ -34,8 +34,13 @@ gets attestations from the same workflow path. The signature shows which
 workflow and ref ran, not that the commit is on `main`. The control is a tag
 ruleset that lets only maintainers create, move or delete `v*` tags.
 
-1. Build jobs on native amd64 and arm64 runners, with read-only repository
-   access, run `make check` and `scripts/release_build.py`.
+1. Build jobs run `make check` and `scripts/release_build.py` on native amd64
+   and arm64 runners with read-only repository access. `make check` includes
+   the govulncheck scan, which needs vuln.go.dev, the Go module proxy and the
+   checksum database. A newly published vulnerability in a function the code
+   calls fails the release run until a dependency or Go update fixes it, or a
+   reviewed row in [the accepted list](../security/vulnerability-exceptions.md)
+   covers it.
 2. The script refuses a dirty tree, a Go toolchain other than `.go-version`,
    and a release version without the matching tag on HEAD. It builds the
    five commands for linux/amd64 and linux/arm64 with `CGO_ENABLED=0`,

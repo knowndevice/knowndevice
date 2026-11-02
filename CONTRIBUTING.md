@@ -27,6 +27,12 @@ documentation. `make check` and `make demo` need
 no services. The reference and profile labs also need Docker with Compose;
 see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
 (or `amd64`) runs every lab cell for one architecture, as CI does.
+`--cell NAME` runs one cell, such as `stable-device-cn-builtin`. An unknown
+name prints the valid names. Every step that runs writes a PASS, SKIP or FAIL
+line to `summary.txt` in the matrix directory. PASS and FAIL lines include
+the exit code; SKIP lines give the reason. The summary also records the load
+average at start and end, lists any `kd-*` containers or networks left after
+the run, and names the detected Docker mode, `rootless` or `rootful`.
 
 ## Pull requests
 
@@ -44,7 +50,19 @@ Sign each commit with `git commit -s` to certify the
 [Developer Certificate of Origin](https://developercertificate.org/).
 Use your own identity and certify only work you have the right to submit.
 A DCO sign-off is separate from cryptographic commit signing. A CLA is not
-required. Preserve third-party license and attribution notices.
+required. The `dco` check fails a pull request if any non-merge commit lacks
+a `Signed-off-by: Name <email>` trailer. Add the trailer with `git rebase --signoff
+origin/main`, then force push to your branch. The check skips merge commits
+and does not compare the sign-off with the commit author. You remain
+responsible for signing off under your own identity. Check locally with
+`python3 scripts/dco_check.py --base origin/main --head HEAD`.
+
+When the base commit contains the check script, the workflow uses that copy,
+so editing the script in a pull request does not weaken the check. The
+workflow file runs from the pull request, so a maintainer reviews every
+change to `.github/workflows/dco.yml`. The `main` branch ruleset requires
+`dco`.
+Preserve third-party license and attribution notices.
 
 ## Review and decisions
 
