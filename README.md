@@ -57,7 +57,7 @@ They remain separate from device evidence.
 | Cobra CLI, strict JSON/YAML, bounded digest-bound plans | Implemented |
 | SQLite WAL/FULL journal, version refusal, writer lock, revision fencing | Implemented |
 | Two ECDSA software signer slots, synced pointer, retirement tombstones | Implemented |
-| `step-ca` 0.29.0 issuance/revoke and unknown-result reconciliation | Implemented in the reference profile |
+| `step-ca` 0.30.2 issuance/revoke and unknown-result reconciliation | Implemented in the reference profile |
 | Mosquitto 2.0.22 mTLS, generational ACL, external MQTT 5 probe | Implemented in the reference profile |
 | Independent application activation and server-observed confirmation | Implemented in the reference profile |
 | Separate device recovery signer and current entitlement checks | Implemented in the reference profile |

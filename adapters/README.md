@@ -5,20 +5,20 @@ device contracts. They are not a stable SDK. The adapter unit tests use real TLS
 and a protocol peer; those tests do not establish Mosquitto, step-ca server,
 device hardware, power-cut, or process isolation compatibility.
 
-`stepca` uses the pinned step-ca `v0.29.0` `/sign` and passive `/revoke` API.
+`stepca` uses the pinned step-ca `v0.30.2` `/sign` and passive `/revoke` API.
 The trusted control service supplies scoped one-time tokens through an
 in-memory callback. The client never returns a token or raw remote body in
 an error. It validates the CSR signature, exact CN and DNS identity, public
 key, configured issuer chain, client-auth usage and validity before returning
 an issued chain. Issuance and revocation status are `unknown`: step-ca has no
 operation-ID lookup in this profile. The client sends no blind retry.
-[`/sign` source](https://github.com/smallstep/certificates/blob/v0.29.0/api/sign.go),
-[`/revoke` source](https://github.com/smallstep/certificates/blob/v0.29.0/api/revoke.go).
+[`/sign` source](https://github.com/smallstep/certificates/blob/v0.30.2/api/sign.go),
+[`/revoke` source](https://github.com/smallstep/certificates/blob/v0.30.2/api/revoke.go).
 
 The profile uses `/sign` for each generation-specific subject.
 `/rekey` supplies the new public key while preserving the existing identity,
 so it cannot implement this profile's changing CN.
-[`/rekey` source](https://github.com/smallstep/certificates/blob/v0.29.0/api/rekey.go).
+[`/rekey` source](https://github.com/smallstep/certificates/blob/v0.30.2/api/rekey.go).
 
 `RevokeCertificate` accepts public material in the control service, which
 does not possess the device signer. Historical certificate validation is
