@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"math/big"
 	"net/http/httptest"
 	"os"
@@ -93,6 +94,33 @@ func TestAwaitResponderReturnsOnExactEcho(t *testing.T) {
 	}
 	if !link.closed {
 		t.Fatal("readiness connection left open")
+	}
+}
+
+func TestConnectResponderRetriesFailedConnectionsAndSubscriptions(t *testing.T) {
+	cut, refused, ready := newFakeLink(nil), newFakeLink(nil), newFakeLink(nil)
+	cut.subscribeErr = fmt.Errorf("MQTT subscription result unavailable: %w", device.ErrUnknown)
+	refused.subscribeErr = errors.New("MQTT SUBSCRIBE refused")
+	opens := []func() (brokerLink, error){
+		func() (brokerLink, error) { return nil, errors.New("broker down") },
+		func() (brokerLink, error) { return cut, nil },
+		func() (brokerLink, error) { return refused, nil },
+		func() (brokerLink, error) { return ready, nil },
+	}
+	attempt := 0
+	var log bytes.Buffer
+	got := connectResponder(func(context.Context) (brokerLink, error) {
+		attempt++
+		return opens[attempt-1]()
+	}, time.Second, time.Millisecond, &log)
+	if got != brokerLink(ready) || attempt != len(opens) {
+		t.Fatalf("connected after %d attempts to %v", attempt, got)
+	}
+	if !cut.closed || !refused.closed || ready.closed {
+		t.Fatalf("closed cut=%v refused=%v ready=%v", cut.closed, refused.closed, ready.closed)
+	}
+	if lines := strings.Count(log.String(), "responder subscription failed: "); lines != 2 {
+		t.Fatalf("logged %d subscription failures:\n%s", lines, log.String())
 	}
 }
 
