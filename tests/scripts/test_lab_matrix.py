@@ -14,7 +14,7 @@ echo "$*" >> "$FAKE_DOCKER_LOG"
 case "$1" in
   info)
     case "$*" in
-      *SecurityOptions*) echo '["name=seccomp"]' ;;
+      *SecurityOptions*) echo "${FAKE_SECURITY_OPTIONS:-[\"name=seccomp\"]}" ;;
       *Architecture*) echo x86_64 ;;
       *OperatingSystem*) echo 'Fake OS' ;;
     esac ;;
@@ -155,6 +155,24 @@ class LabMatrixTests(unittest.TestCase):
         downs = [call for call in self.docker_calls() if call.startswith("compose") and call.endswith(" down")]
         self.assertEqual(len(downs), len(CELLS))
         self.assert_closing_lines(self.summary())
+
+    def test_records_docker_mode_and_container_user(self):
+        cases = [
+            ({}, "docker mode: rootful", f"container user: {os.getuid()}:{os.getgid()}"),
+            ({"FAKE_SECURITY_OPTIONS": '["name=seccomp","name=rootless"]'}, "docker mode: rootless", "container user: 0:0"),
+            (
+                {"FAKE_SECURITY_OPTIONS": '["name=rootless"]', "KNOWNDEVICE_LAB_USER": "1234:1234"},
+                "docker mode: rootless",
+                "container user: 1234:1234",
+            ),
+        ]
+        for env, mode, user in cases:
+            with self.subTest(env=env):
+                shutil.rmtree(self.matrix, ignore_errors=True)
+                result = self.run_matrix("--cell", "legacy-reference-builtin", "amd64", **env)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(mode, self.summary())
+                self.assertIn(user, self.summary())
 
     def test_one_cell_skips_the_generated_adapter(self):
         result = self.run_matrix("--cell", "legacy-reference-builtin", "amd64")

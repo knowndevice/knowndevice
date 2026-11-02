@@ -31,8 +31,8 @@ see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
 name prints the valid names. Every step that runs writes a PASS, SKIP or FAIL
 line to `summary.txt` in the matrix directory. PASS and FAIL lines include
 the exit code; SKIP lines give the reason. The summary also records the load
-average at start and end and lists any `kd-*` containers or networks left
-after the run.
+average at start and end, lists any `kd-*` containers or networks left after
+the run, and names the detected Docker mode, `rootless` or `rootful`.
 
 ## Pull requests
 

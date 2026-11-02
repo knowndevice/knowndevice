@@ -158,9 +158,10 @@ fi
 # Docker Engine on Linux keeps host file ownership, and the journal and key
 # store refuse files owned by another user, so containers run as the seeding
 # user. Rootless Docker already maps container root to that user.
+security="$(docker info --format '{{json .SecurityOptions}}')"
+if [[ "$security" == *name=rootless* ]]; then docker_mode=rootless; else docker_mode=rootful; fi
 if [[ -z "${KNOWNDEVICE_LAB_USER:-}" ]]; then
-  security="$(docker info --format '{{json .SecurityOptions}}')"
-  if [[ "$security" == *name=rootless* ]]; then
+  if [[ "$docker_mode" == rootless ]]; then
     KNOWNDEVICE_LAB_USER=0:0
   else
     KNOWNDEVICE_LAB_USER="$(id -u):$(id -g)"
@@ -173,6 +174,7 @@ if [[ "$host_arch" == "$arch" ]]; then mode=native; else mode=emulated; fi
 runtime="linux/$arch $mode on $host_arch Docker host ($(docker info --format '{{.OperatingSystem}}'))"
 {
   echo "runtime: $runtime"
+  echo "docker mode: $docker_mode"
   echo "container user: $KNOWNDEVICE_LAB_USER"
 } >> "$summary"
 pass
