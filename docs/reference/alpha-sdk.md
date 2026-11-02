@@ -112,6 +112,10 @@ Timeout/cancel/crash/late or lost reply after dispatch remains unknown; a fresh
 session queries/imports the original durable reservation, without blind replay.
 Cancel stops work/grants, without undoing effects, deleting intent or releasing
 reserved generations. Unfinished expired plans still need intervention.
+With the process adapter, application `/activate` and control `/activate`
+share one `RequestTimeoutSeconds` scope; an activation that exhausts it ends
+unknown and needs reconciliation, while in-process activation gives each
+request its own timeout.
 
 The same backend/controller requires authenticated durable Application status,
 activation revision and new post-switch independent actual-peer observation.

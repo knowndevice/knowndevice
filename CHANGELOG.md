@@ -84,6 +84,8 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run and the detected Docker mode.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Give profile lab process compositions a 10 s request timeout, because two
+  activation requests share one process call scope.
 - Retry the lab responder's connection when an MQTT subscription fails, so a
   broker restart during SUBSCRIBE no longer leaves the responder stopped.
 - Update the reference and profile labs from step-ca 0.29.0 to 0.30.2 and name
