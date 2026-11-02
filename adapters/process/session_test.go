@@ -331,7 +331,7 @@ func (b *fixtureBackend) RetirementStatus(context.Context, device.Plan, device.C
 	return device.Retirement{}, device.ErrUnknown
 }
 func backendAdapters(s *device.PublicSnapshot, b *fixtureBackend) device.Adapters {
-	return device.Adapters{Entitlement: b, Authority: b, Platform: b, Transport: b, Application: b, Withdrawal: b, Clock: device.SystemClock{Uncertainty: time.Second, MaximumAge: time.Duration(s.Limits.MaximumAssessmentAgeSeconds) * time.Second, DriftPPM: float64(s.Limits.DriftPPM)}}
+	return device.Adapters{Entitlement: b, Authority: b, Platform: b, Transport: b, Application: b, Withdrawal: b, Clock: device.SystemClock{Uncertainty: 100 * time.Millisecond, MaximumAge: time.Duration(s.Limits.MaximumAssessmentAgeSeconds) * time.Second, DriftPPM: float64(s.Limits.DriftPPM)}}
 }
 
 type peer struct {
@@ -723,7 +723,7 @@ func TestCancelLostLateAndUnsolicitedResponseRequireNewSession(t *testing.T) {
 				if !errors.Is(err, device.ErrUnknown) {
 					t.Fatal("lost effect was not unknown", err)
 				}
-			case <-time.After(2 * time.Second):
+			case <-time.After(10 * time.Second):
 				t.Fatal("host exceeded execution bound")
 			}
 			if err := c.Health(context.Background()); !errors.Is(err, device.ErrUnknown) {

@@ -147,6 +147,21 @@ func (j failingObservationJournal) Save(ctx context.Context, s device.State, rev
 	return j.Journal.Save(ctx, s, revision)
 }
 
+// fixedClock reports one instant, so evidence freshness does not depend on how
+// long a loaded host takes to run the test.
+type fixedClock struct{ at time.Time }
+
+func (c fixedClock) Assess(ctx context.Context, floor time.Time) (device.ClockAssessment, error) {
+	if err := ctx.Err(); err != nil {
+		return device.ClockAssessment{}, err
+	}
+	a := device.ClockAssessment{Earliest: c.at.Add(-time.Second), Latest: c.at.Add(time.Second), AssessedAt: c.at, MaximumAge: 10 * time.Second, Trusted: true, Source: "trusted-system-clock"}
+	if a.Earliest.Before(floor) {
+		return device.ClockAssessment{}, device.ErrDenied
+	}
+	return a, nil
+}
+
 func liveProofFixture(t *testing.T) (*Engine, device.Plan, *journal.Store, *liveProofKeys, device.Activation) {
 	t.Helper()
 	ctx := context.Background()
@@ -290,7 +305,7 @@ func liveProofFixture(t *testing.T) (*Engine, device.Plan, *journal.Store, *live
 	state.Operation.Activation = &activation
 	save(device.Activated)
 	keys := &liveProofKeys{Store: store, journal: j}
-	e := &Engine{Config: cfg, Journal: j, Keys: keys, Snapshot: snapshot, Clock: device.SystemClock{Uncertainty: time.Second, MaximumAge: 10 * time.Second}, Platform: &liveProofPlatform{activation: activation}, Checkpoint: func(phase string) error {
+	e := &Engine{Config: cfg, Journal: j, Keys: keys, Snapshot: snapshot, Clock: fixedClock{at: now}, Now: func() time.Time { return now }, Platform: &liveProofPlatform{activation: activation}, Checkpoint: func(phase string) error {
 		if phase == "pointer-written" {
 			return device.ErrUnknown
 		}
@@ -311,7 +326,7 @@ func TestFreshObservationIsDurableBeforePointerAndReplayFailsAfterReopen(t *test
 	fresh.Probe.Nonce = strings.Repeat("d", 32)
 	fresh.Evidence.Challenge = fresh.Probe
 	fresh.Evidence.Evidence.RequestID = strings.Repeat("e", 32)
-	fresh.Evidence.Evidence.ObservedAt = time.Now().UTC()
+	fresh.Evidence.Evidence.ObservedAt = e.Now().Add(500 * time.Millisecond)
 	keys.wantNonce = fresh.Probe.Nonce
 	e.Platform = &liveProofPlatform{activation: fresh}
 	if _, err := e.Apply(ctx, p); !errors.Is(err, device.ErrUnknown) || keys.activated != 1 {
@@ -340,7 +355,7 @@ func TestObservationSaveFailureStopsBeforePointer(t *testing.T) {
 	fresh.Probe.Nonce = strings.Repeat("d", 32)
 	fresh.Evidence.Challenge = fresh.Probe
 	fresh.Evidence.Evidence.RequestID = strings.Repeat("e", 32)
-	fresh.Evidence.Evidence.ObservedAt = time.Now().UTC()
+	fresh.Evidence.Evidence.ObservedAt = e.Now().Add(500 * time.Millisecond)
 	e.Platform = &liveProofPlatform{activation: fresh}
 	e.Journal = failingObservationJournal{Journal: j, oldNonce: stored.Probe.Nonce}
 	if _, err := e.Apply(context.Background(), p); !errors.Is(err, device.ErrUnknown) || keys.activated != 0 {

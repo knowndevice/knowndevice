@@ -321,7 +321,7 @@ func TestDelayedAuthorityHandshakePastDeadlineSendsNoSign(t *testing.T) {
 	r := testReservation(t, snapshot, p)
 	r.IssueSent = true
 	control := &control{dir: dir, config: cfg, snapshot: snapshot, authorityCaller: caller}
-	ctx := timerlessDeadline{Context: context.Background(), at: time.Now().Add(100 * time.Millisecond)}
+	ctx := timerlessDeadline{Context: context.Background(), at: time.Now().Add(time.Second)}
 	started := time.Now()
 	if _, e = control.sign(ctx, &r); e == nil || requests.Load() != 0 || signerCalls.Load() != 1 || time.Since(started) < 2200*time.Millisecond {
 		t.Fatalf("authority effect followed a delayed handshake past deadline: err=%v requests=%d signer calls=%d elapsed=%s plan remaining=%s", e, requests.Load(), signerCalls.Load(), time.Since(started), time.Until(p.ExpiresAt))
