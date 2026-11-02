@@ -71,8 +71,8 @@ match the sign-off to the commit author. When the base commit contains the
 checker script, the workflow uses that copy, so editing the script in a pull
 request does not weaken the check. The workflow file runs from the pull
 request, so changes to `.github/workflows/dco.yml` need maintainer review.
-`dco` is not a required check until the branch ruleset names it. Run the
-checker locally before pushing:
+The `main` branch ruleset requires `dco`. Run the checker locally before
+pushing:
 
 ```sh
 python3 scripts/dco_check.py --base origin/main --head HEAD

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// Package stepca implements the step-ca v0.29.0 sign and passive revoke API.
+// Package stepca implements the step-ca v0.30.2 sign and passive revoke API.
 package stepca
 
 import (
