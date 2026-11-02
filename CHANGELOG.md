@@ -82,14 +82,17 @@ development profile.
 - Report PASS, SKIP or FAIL for every step in `scripts/lab_matrix.sh`, with
   exit codes for PASS and FAIL. Add `--cell NAME` to run one cell. Record the
   load average at start and end in `summary.txt`, along with any `kd-*`
-  containers and networks left after the run.
+  containers and networks left after the run and the detected Docker mode.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
 - Give profile lab process compositions a 10 s request timeout, because two
   activation requests share one process call scope.
+- Retry the lab responder's connection when an MQTT subscription fails, so a
+  broker restart during SUBSCRIBE no longer leaves the responder stopped.
 - Pin Go to `.go-version` and reject other versions; lint workflows with
   actionlint and shellcheck; fail on called govulncheck findings without
   reviewed exceptions. Run a `dco` sign-off check on pull requests; upload
   scanned `logs/` and `summary.txt` when a lab run fails.
+- Require the `dco` check on `main`, alongside both native Quality jobs.
 - Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
   On Docker Engine for Linux, root containers could not use the seeded state:
   `init` and the lab checks stopped with "journal storage must be owned by the

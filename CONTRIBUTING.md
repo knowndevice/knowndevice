@@ -31,8 +31,8 @@ see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
 name prints the valid names. Every step that runs writes a PASS, SKIP or FAIL
 line to `summary.txt` in the matrix directory. PASS and FAIL lines include
 the exit code; SKIP lines give the reason. The summary also records the load
-average at start and end and lists any `kd-*` containers or networks left
-after the run.
+average at start and end, lists any `kd-*` containers or networks left after
+the run, and names the detected Docker mode, `rootless` or `rootful`.
 
 ## Pull requests
 
@@ -60,8 +60,8 @@ responsible for signing off under your own identity. Check locally with
 When the base commit contains the check script, the workflow uses that copy,
 so editing the script in a pull request does not weaken the check. The
 workflow file runs from the pull request, so a maintainer reviews every
-change to `.github/workflows/dco.yml`. `dco` is not a required check until
-the branch ruleset names it.
+change to `.github/workflows/dco.yml`. The `main` branch ruleset requires
+`dco`.
 Preserve third-party license and attribution notices.
 
 ## Review and decisions
