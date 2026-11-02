@@ -164,9 +164,10 @@ hardware power-cut as not run. A nonzero tester exit or partial report is not a
 full pass.
 
 `make check` separately covers storage fencing, confinement, parsing, protocol
-limits and race tests. Linux filesystem-fault tests require an actual fault
-mount and are separate from ordinary native tests. CI is configured for this
-example on both Linux runners; execution requires an actual CI run.
+limits and race tests. `bash scripts/fs_faults.sh --execute` runs the Linux
+filesystem-fault tests in Docker, separately from ordinary native tests. CI is
+configured for this example on both Linux runners; execution requires an
+actual CI run.
 
 ## Cleanup and separate simulations
 

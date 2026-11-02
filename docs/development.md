@@ -162,9 +162,26 @@ cross-compilation. Cross-building a binary is not a hardware test.
 The real generated-data integration matrix runs separately with the
 [reference quickstart](quickstart.md). It uses digest-pinned Docker images,
 an independent application/responder and actual killed CLI processes.
-Filesystem-fault tests in journal/keystore require `KD_FS_ROOT`
-and `KD_FS_FAULT` on a Linux ENOSPC or read-only mount; ordinary
-native tests explicitly skip that profile. Do not report those skips as passes.
+
+`bash scripts/fs_faults.sh --execute` runs twelve Linux Docker containers on
+the Docker host's architecture. The `enospc-tmpfs` and `erofs-readonly`
+profiles cover `journal` and `keystore`, with `v1`
+(`TestFilesystemFaultMount`) and `v2` (`TestV2FilesystemFaultMount`). Four
+containers run ENOSPC on fresh 8 MiB tmpfs mounts; eight run EROFS setup and
+read-only checks on fresh bind directories. The tests need `KD_FS_ROOT` and
+`KD_FS_FAULT`; the script sets both.
+
+The `filesystem-faults` CI job runs the command on native amd64
+(`ubuntu-24.04`) and native arm64 (`ubuntu-24.04-arm`). The default gate and
+`make check` still skip these tests. Skips are not passes.
+
+A pass requires exit 0, no skip, and `--- PASS:` for the selected test. The
+mount line must show `/fault` with tmpfs and rw for `enospc`, ro for `erofs`,
+or rw for `setup`. Each non-setup run and each of its subtests must log the
+observed fault. The filler line before the fault does not count as an
+observation. A run with only skips exits 3. Results go to a new
+`.work/fs-faults-<UTC>-<pid>/`, or `KNOWNDEVICE_FS_FAULT_DIR`; the job keeps
+`logs/` and `summary.txt` for 14 days.
 
 The module path is `github.com/knowndevice/knowndevice`. No module version
 is published yet; a consumer outside this checkout uses a local `replace`,

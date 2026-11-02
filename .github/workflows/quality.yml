@@ -78,3 +78,54 @@ jobs:
             ${{ runner.temp }}/knowndevice-lab-matrix/summary.txt
           if-no-files-found: warn
           retention-days: 14
+
+  filesystem-faults:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .go-version
+          cache: false
+      - name: Run the filesystem-fault profiles
+        # A hang fails this step, so the scan and upload below still run. The limit
+        # covers twelve runs at the script's test timeout, the builds and the image pull.
+        timeout-minutes: 40
+        env:
+          KNOWNDEVICE_FS_FAULT_DIR: ${{ runner.temp }}/knowndevice-fs-faults
+        run: bash scripts/fs_faults.sh --execute
+      # The results directory also holds generated test keys in mounts/; only
+      # logs/ and summary.txt may leave the runner, and only after the scan.
+      - name: Scan filesystem-fault results for secret markers
+        id: fault_scan
+        if: ${{ !cancelled() }}
+        env:
+          FAULT_DIR: ${{ runner.temp }}/knowndevice-fs-faults
+        run: |
+          if [[ ! -d "$FAULT_DIR/logs" ]]; then
+            echo "The filesystem-fault script did not start; no results to upload."
+            exit 0
+          fi
+          python3 scripts/secret_scan.py "$FAULT_DIR/logs" --file "$FAULT_DIR/summary.txt"
+          echo "upload=true" >> "$GITHUB_OUTPUT"
+      - name: Upload filesystem-fault results
+        if: ${{ !cancelled() && steps.fault_scan.outputs.upload == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fs-fault-results-${{ matrix.arch }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/knowndevice-fs-faults/logs/
+            ${{ runner.temp }}/knowndevice-fs-faults/summary.txt
+          if-no-files-found: warn
+          retention-days: 14
