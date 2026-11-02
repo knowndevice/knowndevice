@@ -84,6 +84,10 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Pin Go to `.go-version` and reject other versions; lint workflows with
+  actionlint and shellcheck; fail on called govulncheck findings without
+  reviewed exceptions. Run a `dco` sign-off check on pull requests; upload
+  scanned `logs/` and `summary.txt` when a lab run fails.
 - Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
   On Docker Engine for Linux, root containers could not use the seeded state:
   `init` and the lab checks stopped with "journal storage must be owned by the

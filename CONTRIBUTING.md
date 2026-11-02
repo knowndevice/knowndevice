@@ -50,7 +50,19 @@ Sign each commit with `git commit -s` to certify the
 [Developer Certificate of Origin](https://developercertificate.org/).
 Use your own identity and certify only work you have the right to submit.
 A DCO sign-off is separate from cryptographic commit signing. A CLA is not
-required. Preserve third-party license and attribution notices.
+required. The `dco` check fails a pull request if any non-merge commit lacks
+a `Signed-off-by: Name <email>` trailer. Add the trailer with `git rebase --signoff
+origin/main`, then force push to your branch. The check skips merge commits
+and does not compare the sign-off with the commit author. You remain
+responsible for signing off under your own identity. Check locally with
+`python3 scripts/dco_check.py --base origin/main --head HEAD`.
+
+When the base commit contains the check script, the workflow uses that copy,
+so editing the script in a pull request does not weaken the check. The
+workflow file runs from the pull request, so a maintainer reviews every
+change to `.github/workflows/dco.yml`. `dco` is not a required check until
+the branch ruleset names it.
+Preserve third-party license and attribution notices.
 
 ## Review and decisions
 
