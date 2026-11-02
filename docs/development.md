@@ -78,6 +78,68 @@ checker locally before pushing:
 python3 scripts/dco_check.py --base origin/main --head HEAD
 ```
 
+## Dependency updates
+
+Dependabot updates are ungrouped: `.github/dependabot.yml` has no `groups`
+key. All three blocks run weekly without a fixed day and allow five open pull
+requests each:
+
+| Ecosystem | Directories |
+| --- | --- |
+| `gomod` | `/`, `/examples/sdk-consumer` |
+| `docker-compose` | `/lab`, `/lab/profiles` |
+| `github-actions` | `/` |
+
+Dependabot commits carry `Signed-off-by: dependabot[bot]
+<support@github.com>`. `scripts/dco_check.py` requires a trailer on every
+non-merge commit and has no bot exemption, so these commits pass `dco`. A
+person adding a commit must add their own `Signed-off-by` trailer.
+
+A Dependabot pull request can fall behind `main`. If `@dependabot rebase` does
+not act on it, `gh pr update-branch` merges `main` into the branch and starts
+the checks; `dco` skips merge commits.
+
+### Image updates
+
+An image digest change requires hosted Quality to pass before merge. Quality
+runs the lab matrix on amd64 and arm64. When an image version changes, update
+documents naming that version and compare the upstream API sources the adapter
+depends on. Decision records retain the version they cite. If both labs pin
+the same image, update them together.
+
+### Go module updates
+
+1. Set `GOTOOLCHAIN=go$(cat .go-version)` and run `go mod tidy` at the root
+   and in `examples/sdk-consumer`.
+2. If yaml or jsonschema changed, update
+   `sdk/adaptergen/templates/go.mod.tmpl` and `go.sum.tmpl`.
+   `TestGeneratedExternalModuleBuilds` checks these templates; the license
+   gate does not.
+3. Run `python3 scripts/license_check.py` to get the exact missing and stale
+   names.
+4. For each new version, compare its module archive's license files with the
+   previous version and copy the required files unchanged from the archive.
+5. Update `third_party/licenses/manifest.json` with the version, upstream
+   filename, source archive and SHA-256.
+6. Update the row and count in `third_party/licenses/README.md` and the
+   corresponding `NOTICE` line. Reproduce any upstream NOTICE verbatim.
+7. Delete the old version directories.
+8. Update version references in documents such as `docs/integrations.md`.
+9. Rerun the license gate and race tests, including `sdk/adaptergen` and the
+   SDK consumer.
+
+A `.go-version` change moves the `go@go<version>` license directory, its
+NOTICE line, README row and manifest entry together.
+
+`scripts/license_check.py` is read-only, takes no arguments and requires
+Python 3.11 or newer. It uses neither the network nor a Go toolchain. Exit 0
+means `NOTICE`, `third_party/licenses/README.md`, `manifest.json` and the
+license directories cover exactly the module versions in both `go.mod` files
+plus the Go version in `.go-version`. Exit 1 names every missing, stale or
+mismatched entry. The script runs as the `licenses` gate in the `all` and
+`docs` targets of `scripts/ci_local.sh`, so `make check` and hosted Quality
+run it.
+
 ## Code conventions
 
 Use gofmt, short cohesive packages, explicit errors and context deadlines.

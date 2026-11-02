@@ -84,6 +84,9 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run and the detected Docker mode.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Check license coverage against both `go.mod` files in the gate, and document
+  how to handle dependency updates. Update SQLite to 1.61.0, yaml to 3.0.6 and
+  their indirect modules, with license files and generated adapter templates.
 - Pin Go to `.go-version` and reject other versions; lint workflows with
   actionlint and shellcheck; fail on called govulncheck findings without
   reviewed exceptions. Run a `dco` sign-off check on pull requests; upload
