@@ -174,6 +174,7 @@ rerun a load-induced failure before calling it a defect.
 | `TestBuiltinPublicSuite` | 1 to 3 minutes | Scale the suite context; the 30 s per-case context stays unchanged. |
 | Controller live-proof tests | Fixed clock; 5 s evidence age unchanged | Set the fresh observation 500 ms after the stored one; retain replay rejection after reopening the journal. |
 | Profile lab delayed-handshake test | 100 ms to 1 s context deadline | Keep the deadline below the 2.2 s signer delay; plan lifetime stays 3 s. |
+| Profile lab process compositions | 5 s to 10 s request timeout | Two activation requests share one process call scope, where the built-in client gives each its own. Real process adapters keep the shared scope. |
 | `TestBlockedServerOutputRespectsContext` | 1 s teardown | Retain; no measured failures. |
 
 With `KNOWNDEVICE_PROCESS_TIMING=1`, the CLI prints one line per process

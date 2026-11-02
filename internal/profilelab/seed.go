@@ -103,6 +103,16 @@ func seedWithLifetime(dir, profileID, serviceArtifact, controllerArtifact string
 	return seedWithProcessArtifact(dir, profileID, serviceArtifact, controllerArtifact, lifetime, "")
 }
 
+// requestTimeoutSeconds doubles the budget for process compositions: application
+// activation sends two HTTP requests inside one process call scope, while the
+// built-in client gives each request its own timeout.
+func requestTimeoutSeconds(processArtifact string) int {
+	if processArtifact != "" {
+		return 10
+	}
+	return 5
+}
+
 func seedWithProcessArtifact(dir, profileID, serviceArtifact, controllerArtifact string, lifetime int, processArtifact string) error {
 	if lifetime < 300 || lifetime > 1200 {
 		return fmt.Errorf("unsupported authority lifetime: expected 300-1200 seconds")
@@ -393,7 +403,7 @@ func seedWithProcessArtifact(dir, profileID, serviceArtifact, controllerArtifact
 			}
 		}
 	}
-	cfg := device.Config{APIVersion: device.V2, DeploymentID: deploymentID, DeviceID: deviceID, StateDir: "/lab/device", ControlURL: "https://profile-control:9443", ApplicationURL: "https://profile-application:9443", ApplicationID: "http-worker", TransportEndpoint: "https://profile-control:9445", RecoveryCertificate: filepath.Join(dir, "recovery", "cert.pem"), RecoveryKey: "/lab/recovery/key.pem", ClockTrust: "trusted-system-clock", RequestTimeoutSeconds: 5, PlanTTLSeconds: 600, CredentialProfile: &profile, Composition: &composition, Trust: trust, Limits: &limits}
+	cfg := device.Config{APIVersion: device.V2, DeploymentID: deploymentID, DeviceID: deviceID, StateDir: "/lab/device", ControlURL: "https://profile-control:9443", ApplicationURL: "https://profile-application:9443", ApplicationID: "http-worker", TransportEndpoint: "https://profile-control:9445", RecoveryCertificate: filepath.Join(dir, "recovery", "cert.pem"), RecoveryKey: "/lab/recovery/key.pem", ClockTrust: "trusted-system-clock", RequestTimeoutSeconds: requestTimeoutSeconds(processArtifact), PlanTTLSeconds: 600, CredentialProfile: &profile, Composition: &composition, Trust: trust, Limits: &limits}
 	snapshot, e := cfg.ResolveSnapshot()
 	if e != nil {
 		return e
