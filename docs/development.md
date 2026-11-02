@@ -77,3 +77,32 @@ Local research, source specifications, planning notes, and contributor
 client configuration are excluded by `.gitignore`. Public documentation
 must stand on its own and link only to published files. The public checkout
 includes the code and checks needed to build, test, and contribute.
+
+## Timing-bound tests
+
+Some race tests bound wall-clock time and can fail on a heavily loaded host.
+Measure them with:
+
+```sh
+python3 scripts/race_timing.py run --out .cache/timing/<name> --count 3
+python3 scripts/race_timing.py summarize FILE
+```
+
+A manual Quality run with `race_timing_count` above 0 measures on both hosted
+runners after the gate. Record each result with the host's one-minute load;
+rerun a load-induced failure before calling it a defect.
+
+| Test or fixture | Bound | Decision |
+| --- | --- | --- |
+| Process adapter start-up | 5 s default; package tests 30 s | Scale only package tests, whose adapter is the race-enabled test binary. |
+| Process test snapshot requests | 1 s to 5 s | Scale the signing-request wait from 1 s to 5 s and the result wait from 2 s to 10 s. |
+| Process test adapter clock uncertainty | 1 s to 100 ms | Leave more time for the assessment round trip; the product limit stays 2,000 ms. |
+| `TestBuiltinPublicSuite` | 1 to 3 minutes | Scale the suite context; the 30 s per-case context stays unchanged. |
+| Controller live-proof tests | Fixed clock; 5 s evidence age unchanged | Set the fresh observation 500 ms after the stored one; retain replay rejection after reopening the journal. |
+| Profile lab delayed-handshake test | 100 ms to 1 s context deadline | Keep the deadline below the 2.2 s signer delay; plan lifetime stays 3 s. |
+| `TestBlockedServerOutputRespectsContext` | 1 s teardown | Retain; no measured failures. |
+
+With `KNOWNDEVICE_PROCESS_TIMING=1`, the CLI prints one line per process
+adapter request to stderr. The profile lab sets it for controller commands and
+shows the log when a command fails. Process adapter tests print the log when
+they fail.
