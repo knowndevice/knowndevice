@@ -78,6 +78,7 @@ external_sdk() {
 
 if [[ "$mode" == all || "$mode" == docs ]]; then
   gate repository "$python" scripts/check_repository.py
+  gate licenses "$python" scripts/license_check.py
 fi
 if [[ "$mode" != docs ]]; then
   gate go-toolchain go_toolchain
