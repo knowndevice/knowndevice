@@ -84,6 +84,8 @@ development profile.
   load average at start and end in `summary.txt`, along with any `kd-*`
   containers and networks left after the run.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
+- Retry the lab responder's connection when an MQTT subscription fails, so a
+  broker restart during SUBSCRIBE no longer leaves the responder stopped.
 - Pin Go to `.go-version` and reject other versions; lint workflows with
   actionlint and shellcheck; fail on called govulncheck findings without
   reviewed exceptions. Run a `dco` sign-off check on pull requests; upload

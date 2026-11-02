@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -233,18 +234,9 @@ func runResponder(dir string) error {
 		return err
 	}
 	options := mqttprobe.Options{Endpoint: cfg.MQTTEndpoint, Roots: roots, Timeout: cfg.Timeout()}
+	open := func(ctx context.Context) (brokerLink, error) { return mqttprobe.OpenTLS(ctx, options, cert) }
 	for {
-		ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout())
-		c, err := mqttprobe.OpenTLS(ctx, options, cert)
-		cancel()
-		if err != nil {
-			time.Sleep(500 * time.Millisecond)
-			continue
-		}
-		if err := c.Subscribe(context.Background(), "kd/+/+/request"); err != nil {
-			c.Close(context.Background())
-			return fmt.Errorf("responder MQTT subscription denied")
-		}
+		c := connectResponder(open, cfg.Timeout(), 500*time.Millisecond, os.Stderr)
 		loop := true
 		for loop {
 			select {
@@ -264,6 +256,26 @@ func runResponder(dir string) error {
 		}
 		c.Close(context.Background())
 		time.Sleep(200 * time.Millisecond)
+	}
+}
+
+// connectResponder returns a link subscribed to probe requests. A broker restart
+// can cut a SUBSCRIBE and nothing restarts the responder, so a failed attempt
+// retries on a new connection instead of ending the process.
+func connectResponder(open func(context.Context) (brokerLink, error), timeout, wait time.Duration, log io.Writer) brokerLink {
+	for {
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		c, err := open(ctx)
+		cancel()
+		if err == nil {
+			err = c.Subscribe(context.Background(), "kd/+/+/request")
+			if err == nil {
+				return c
+			}
+			c.Close(context.Background())
+			fmt.Fprintf(log, "responder subscription failed: %v\n", err)
+		}
+		time.Sleep(wait)
 	}
 }
 
