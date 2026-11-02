@@ -87,6 +87,8 @@ development profile.
 - Check license coverage against both `go.mod` files in the gate, and document
   how to handle dependency updates. Update SQLite to 1.61.0, yaml to 3.0.6 and
   their indirect modules, with license files and generated adapter templates.
+- Give profile lab process compositions a 10 s request timeout, because two
+  activation requests share one process call scope.
 - Retry the lab responder's connection when an MQTT subscription fails, so a
   broker restart during SUBSCRIBE no longer leaves the responder stopped.
 - Update the reference and profile labs from step-ca 0.29.0 to 0.30.2 and name
