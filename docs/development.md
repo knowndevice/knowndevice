@@ -173,7 +173,8 @@ read-only checks on fresh bind directories. The tests need `KD_FS_ROOT` and
 
 The `filesystem-faults` CI job runs the command on native amd64
 (`ubuntu-24.04`) and native arm64 (`ubuntu-24.04-arm`). The default gate and
-`make check` still skip these tests. Skips are not passes.
+`make check` still skip these tests. Skips are not passes. The `main` branch
+ruleset requires both jobs.
 
 A pass requires exit 0, no skip, and `--- PASS:` for the selected test. The
 mount line must show `/fault` with tmpfs and rw for `enospc`, ro for `erofs`,
