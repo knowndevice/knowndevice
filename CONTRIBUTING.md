@@ -27,6 +27,12 @@ documentation. `make check` and `make demo` need
 no services. The reference and profile labs also need Docker with Compose;
 see the [quickstart](docs/quickstart.md). `bash scripts/lab_matrix.sh arm64`
 (or `amd64`) runs every lab cell for one architecture, as CI does.
+`--cell NAME` runs one cell, such as `stable-device-cn-builtin`. An unknown
+name prints the valid names. Every step that runs writes a PASS, SKIP or FAIL
+line to `summary.txt` in the matrix directory. PASS and FAIL lines include
+the exit code; SKIP lines give the reason. The summary also records the load
+average at start and end and lists any `kd-*` containers or networks left
+after the run.
 
 ## Pull requests
 
