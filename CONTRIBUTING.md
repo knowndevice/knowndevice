@@ -60,8 +60,8 @@ responsible for signing off under your own identity. Check locally with
 When the base commit contains the check script, the workflow uses that copy,
 so editing the script in a pull request does not weaken the check. The
 workflow file runs from the pull request, so a maintainer reviews every
-change to `.github/workflows/dco.yml`. `dco` is not a required check until
-the branch ruleset names it.
+change to `.github/workflows/dco.yml`. The `main` branch ruleset requires
+`dco`.
 Preserve third-party license and attribution notices.
 
 ## Review and decisions
