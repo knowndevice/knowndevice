@@ -2,7 +2,7 @@
 
 This generated-data lab exercises both RFC 0005 credential profiles through
 the same controller and local HTTP roles, either built in or behind the
-negotiated stdio adapter. It runs step-ca 0.29.0,
+negotiated stdio adapter. It runs step-ca 0.30.2,
 an exact TLS-peer enforcer, and a separate Application process. It does not
 establish the independent KD-029 profile, shared-deployment KD-030 withdrawal,
 hardware behavior or a released SDK.
