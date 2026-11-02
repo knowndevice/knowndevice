@@ -79,6 +79,10 @@ development profile.
 - Add `scripts/lab_matrix.sh`, which runs the reference and both profile labs
   with built-in and generated-process adapters for one Linux architecture.
   CI runs it natively on amd64 and arm64.
+- Report PASS, SKIP or FAIL for every step in `scripts/lab_matrix.sh`, with
+  exit codes for PASS and FAIL. Add `--cell NAME` to run one cell. Record the
+  load average at start and end in `summary.txt`, along with any `kd-*`
+  containers and networks left after the run.
 - Fix the CI workflow, which used the `runner` context in job-level `env`.
 - Run lab containers as the user in `KNOWNDEVICE_LAB_USER` (root when unset).
   On Docker Engine for Linux, root containers could not use the seeded state:
