@@ -7,7 +7,7 @@ require (
 	github.com/google/jsonschema-go v0.4.3
 	github.com/spf13/cobra v1.10.2
 	go.yaml.in/yaml/v3 v3.0.6
-	modernc.org/sqlite v1.61.0
+	modernc.org/sqlite v1.61.1
 )
 
 require (
